@@ -22,6 +22,41 @@
     <title>React App</title>
   </head>
   <body>
+    <script src="/wam/audioworklet.js"></script>
+    <script src="/wam/dx7/dx7-lib.js"></script>
+    <script src="/wam/dx7/gui/gui.js"></script>
+    <script src="/wam/dx7/gui/keys.js"></script>
+    <link rel="stylesheet" href="/wam/dx7/gui/dx7.css" />
+
+    <main>
+      <div id="content">
+        <div id="topbar">
+          <div>webDX7</div>
+          <div class="right">
+            <div class="control">
+              <label>bank</label>
+              <select id="banks"></select>
+            </div>
+
+            <div class="control">
+              <label>patch</label>
+              <select id="patches"></select>
+            </div>
+
+            <div class="control">
+              <label>midi in</label>
+              <select id="midiIn"></select>
+            </div>
+          </div>
+          <!-- right -->
+        </div>
+        <!-- topbar -->
+        <div id="keys"></div>
+      </div>
+      <!-- content -->
+    </main>
+
+    <script src="/dx7init.js"></script>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
     <!--

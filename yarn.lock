@@ -1200,6 +1200,71 @@
     "@svgr/plugin-svgo" "^4.0.3"
     loader-utils "^1.1.0"
 
+"@tonaljs/array@^3.2.1":
+  version "3.2.1"
+  resolved "https://registry.yarnpkg.com/@tonaljs/array/-/array-3.2.1.tgz#8b4094506434cb24cb40a7a86199594c0bad5233"
+  integrity sha512-ux0rOa9Zy3vH8ZOUQmRodxd4bhA8PrQ9ceC0d9nQxMr5XNox+Y9xgD7eMdEc7CxFItsfSoR5GXnaq3Pv7JFNbw==
+  dependencies:
+    "@tonaljs/tonal" "^3.2.1"
+
+"@tonaljs/chord-dictionary@^3.2.1":
+  version "3.2.1"
+  resolved "https://registry.yarnpkg.com/@tonaljs/chord-dictionary/-/chord-dictionary-3.2.1.tgz#58fa0fe2973f3f7d926c4bce49e408313ebfb83d"
+  integrity sha512-9oIFQ7KA0myV9CDYzlQD1HAI/67ud4mfMmVTDtrjCr6U+EBVgTGic2aPbyCETm2W3p1dRSgMAmB3uEsAGijPSQ==
+  dependencies:
+    "@tonaljs/interval" "^3.2.1"
+    "@tonaljs/pcset" "^3.2.1"
+
+"@tonaljs/chord@^3.2.1":
+  version "3.2.1"
+  resolved "https://registry.yarnpkg.com/@tonaljs/chord/-/chord-3.2.1.tgz#a32adee7ce06f789ec958f70dbdbf22fe91a809c"
+  integrity sha512-bY7ugaSC87JR0c73MRnRt2Wk7vTuCrNF0cmazxrKzFi7+nyXhgvAI2xS0QBm2s7aTpoK7qEODrXQ5lnRbQYT0A==
+  dependencies:
+    "@tonaljs/array" "^3.2.1"
+    "@tonaljs/chord-dictionary" "^3.2.1"
+    "@tonaljs/pcset" "^3.2.1"
+    "@tonaljs/scale-dictionary" "^3.2.1"
+    "@tonaljs/tonal" "^3.2.1"
+
+"@tonaljs/interval@^3.2.1":
+  version "3.2.1"
+  resolved "https://registry.yarnpkg.com/@tonaljs/interval/-/interval-3.2.1.tgz#c1b9d0a7c517b50a3d0d8220c89580bc885b6a28"
+  integrity sha512-R6ijiUOLPO0Sp7IqxC6LsmLGKq4s+JoeEVrHRl9tFBKi4Pa8kNZ3g1YZtYCBC53tNZYbv6a3bfh0bwtHZQ/7WA==
+  dependencies:
+    "@tonaljs/tonal" "^3.2.1"
+
+"@tonaljs/pcset@^3.2.1":
+  version "3.2.1"
+  resolved "https://registry.yarnpkg.com/@tonaljs/pcset/-/pcset-3.2.1.tgz#76b9dd2c171c7e117d350ed14877b2c27db2a4ea"
+  integrity sha512-WYhb1dh/Y08kaauAFy1AfmMDlXgQeLWgTmyM14vOXwc1iitjqFfBrFXHVtzsGzGVAXU62FPk6624d8ZXYZ5Eeg==
+  dependencies:
+    "@tonaljs/array" "^3.2.1"
+    "@tonaljs/tonal" "^3.2.1"
+
+"@tonaljs/scale-dictionary@^3.2.1":
+  version "3.2.1"
+  resolved "https://registry.yarnpkg.com/@tonaljs/scale-dictionary/-/scale-dictionary-3.2.1.tgz#eaf821ee56e4a89becb43e1aa3724c4901b57f00"
+  integrity sha512-1iML3st1XWqZ4C0kfP7AAQReV/LnFb1e13zUUvzhu1Jh6kMXzh+qw19Jhtuhocqygbd7qj2zTAYl5xmL4dh+ng==
+  dependencies:
+    "@tonaljs/interval" "^3.2.1"
+    "@tonaljs/pcset" "^3.2.1"
+
+"@tonaljs/scale@^3.2.1":
+  version "3.2.1"
+  resolved "https://registry.yarnpkg.com/@tonaljs/scale/-/scale-3.2.1.tgz#901a75878ad915ab9bb134aabb6a28873e3f2d31"
+  integrity sha512-rvCbQz0E1vdGX4K9Gzh1sWaMvxX3azJ2D0vA4wDpsEtzr4r6S3Sn4UPuRjkjwxtbeVpXwCybqykfYnh2koZIYA==
+  dependencies:
+    "@tonaljs/array" "^3.2.1"
+    "@tonaljs/chord-dictionary" "^3.2.1"
+    "@tonaljs/pcset" "^3.2.1"
+    "@tonaljs/scale-dictionary" "^3.2.1"
+    "@tonaljs/tonal" "^3.2.1"
+
+"@tonaljs/tonal@^3.2.1":
+  version "3.2.1"
+  resolved "https://registry.yarnpkg.com/@tonaljs/tonal/-/tonal-3.2.1.tgz#46ff32085be94485e63287cd6f377ed47f8148b5"
+  integrity sha512-I4Xustr/2FtYKmCMMKGldw+gM8k+UtjP2gcd0gPJF475zIG/Q0F4SGYTDBtHJ59eyAcPsB33/xVM6FCcJtV+WQ==
+
 "@types/babel__core@^7.1.0":
   version "7.1.1"
   resolved "https://registry.yarnpkg.com/@types/babel__core/-/babel__core-7.1.1.tgz#ce9a9e5d92b7031421e1d0d74ae59f572ba48be6"
@@ -4121,11 +4186,6 @@ fs.realpath@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/fs.realpath/-/fs.realpath-1.0.0.tgz#1504ad2523158caa40db4a2787cb01411994ea4f"
   integrity sha1-FQStJSMVjKpA20onh8sBQRmU6k8=
-
-fsevents@2.0.6:
-  version "2.0.6"
-  resolved "https://registry.yarnpkg.com/fsevents/-/fsevents-2.0.6.tgz#87b19df0bfb4a1a51d7ddb51b01b5f3bedb40c33"
-  integrity sha512-vfmKZp3XPM36DNF0qhW+Cdxk7xm7gTEHY1clv1Xq1arwRQuKZgAhw+NZNWbJBtuaNxzNXwhfdPYRrvIbjfS33A==
 
 fsevents@^1.2.7:
   version "1.2.9"
@@ -7870,66 +7930,6 @@ react-is@^16.8.1, react-is@^16.8.4:
   version "16.8.6"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.8.6.tgz#5bbc1e2d29141c9fbdfed456343fe2bc430a6a16"
   integrity sha512-aUk3bHfZ2bRSVFFbbeVS4i+lNPZr3/WM5jT2J5omUVV1zzcs1nAaf3l51ctA5FFvCRbhrH0bdAsRRQddFJZPtA==
-
-react-scripts@3.0.1:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/react-scripts/-/react-scripts-3.0.1.tgz#e5565350d8069cc9966b5998d3fe3befe3d243ac"
-  integrity sha512-LKEjBhVpEB+c312NeJhzF+NATxF7JkHNr5GhtwMeRS1cMeLElMeIu8Ye7WGHtDP7iz7ra4ryy48Zpo6G/cwWUw==
-  dependencies:
-    "@babel/core" "7.4.3"
-    "@svgr/webpack" "4.1.0"
-    "@typescript-eslint/eslint-plugin" "1.6.0"
-    "@typescript-eslint/parser" "1.6.0"
-    babel-eslint "10.0.1"
-    babel-jest "^24.8.0"
-    babel-loader "8.0.5"
-    babel-plugin-named-asset-import "^0.3.2"
-    babel-preset-react-app "^9.0.0"
-    camelcase "^5.2.0"
-    case-sensitive-paths-webpack-plugin "2.2.0"
-    css-loader "2.1.1"
-    dotenv "6.2.0"
-    dotenv-expand "4.2.0"
-    eslint "^5.16.0"
-    eslint-config-react-app "^4.0.1"
-    eslint-loader "2.1.2"
-    eslint-plugin-flowtype "2.50.1"
-    eslint-plugin-import "2.16.0"
-    eslint-plugin-jsx-a11y "6.2.1"
-    eslint-plugin-react "7.12.4"
-    eslint-plugin-react-hooks "^1.5.0"
-    file-loader "3.0.1"
-    fs-extra "7.0.1"
-    html-webpack-plugin "4.0.0-beta.5"
-    identity-obj-proxy "3.0.0"
-    is-wsl "^1.1.0"
-    jest "24.7.1"
-    jest-environment-jsdom-fourteen "0.1.0"
-    jest-resolve "24.7.1"
-    jest-watch-typeahead "0.3.0"
-    mini-css-extract-plugin "0.5.0"
-    optimize-css-assets-webpack-plugin "5.0.1"
-    pnp-webpack-plugin "1.2.1"
-    postcss-flexbugs-fixes "4.1.0"
-    postcss-loader "3.0.0"
-    postcss-normalize "7.0.1"
-    postcss-preset-env "6.6.0"
-    postcss-safe-parser "4.0.1"
-    react-app-polyfill "^1.0.1"
-    react-dev-utils "^9.0.1"
-    resolve "1.10.0"
-    sass-loader "7.1.0"
-    semver "6.0.0"
-    style-loader "0.23.1"
-    terser-webpack-plugin "1.2.3"
-    ts-pnp "1.1.2"
-    url-loader "1.1.2"
-    webpack "4.29.6"
-    webpack-dev-server "3.2.1"
-    webpack-manifest-plugin "2.0.4"
-    workbox-webpack-plugin "4.2.0"
-  optionalDependencies:
-    fsevents "2.0.6"
 
 react@^16.8.6:
   version "16.8.6"
