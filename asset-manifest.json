@@ -1,0 +1,16 @@
+{
+  "files": {
+    "main.css": "/scaletoy/static/css/main.2cce8147.chunk.css",
+    "main.js": "/scaletoy/static/js/main.03aa48dd.chunk.js",
+    "main.js.map": "/scaletoy/static/js/main.03aa48dd.chunk.js.map",
+    "runtime~main.js": "/scaletoy/static/js/runtime~main.a8febe43.js",
+    "runtime~main.js.map": "/scaletoy/static/js/runtime~main.a8febe43.js.map",
+    "static/js/2.9cecb92c.chunk.js": "/scaletoy/static/js/2.9cecb92c.chunk.js",
+    "static/js/2.9cecb92c.chunk.js.map": "/scaletoy/static/js/2.9cecb92c.chunk.js.map",
+    "index.html": "/scaletoy/index.html",
+    "precache-manifest.42cd59afeb52e858c5a4a967dc56f942.js": "/scaletoy/precache-manifest.42cd59afeb52e858c5a4a967dc56f942.js",
+    "service-worker.js": "/scaletoy/service-worker.js",
+    "static/css/main.2cce8147.chunk.css.map": "/scaletoy/static/css/main.2cce8147.chunk.css.map",
+    "static/media/logo.svg": "/scaletoy/static/media/logo.5d5d9eef.svg"
+  }
+}
