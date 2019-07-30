@@ -31,3 +31,27 @@
     transform: rotate(360deg);
   }
 }
+
+body {
+  background: #334;
+  color: white;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button {
+  background: #334;
+  color: white;
+  border-radius: 4px;
+  margin: 0 4px;
+}
+
+/*dark mode*/
+body.dark {
+  background: #ddc;
+}
+html.dark {
+  filter: invert(100%);
+}

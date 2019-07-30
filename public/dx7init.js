@@ -1,8 +1,8 @@
 var actx, dx7;
 
-var banklist = ['ROM1A.SYX', 'ENO.SYX'];
-
 function initDX7() {
+  var banklist = ['ROM1A.SYX', 'ENO.SYX'];
+
   const errHandler = e => {
     console.error(e);
     debugger;
@@ -20,10 +20,16 @@ function initDX7() {
         document.getElementById('unsupported').style.display = 'block';
       DX7.importScripts(actx)
         .then(() => {
-          dx7 = new DX7(actx);
-          dx7.connect(actx.destination);
+          dx7 = new DX7(actx, {samplesPerBuffer: 256});
+          var gainNode = actx.createGain();
 
-          initGUI(new DX7Library());
+          dx7.connect(gainNode);
+          // TODO implement volume control
+          // gainNode.gain.setValueAtTime(0.2, actx.currentTime);
+
+          gainNode.connect(actx.destination);
+
+          initGUI(new DX7Library(banklist));
           initMidi();
 
           onDX7Init(dx7, actx);

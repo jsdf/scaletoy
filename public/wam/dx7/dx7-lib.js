@@ -2,7 +2,7 @@
 // bank and patch handling
 // Jari Kleimola 2017 (jari@webaudiomodules.org)
 
-var DX7Library = function() {
+var DX7Library = function(banklist) {
   this.banks = banklist;
   this.patches = [];
   this.bank = [];
