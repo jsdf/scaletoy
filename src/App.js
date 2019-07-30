@@ -64,7 +64,7 @@ const velocityMidi = 80;
 const TEST_PLAY_SCALE = false;
 
 function testPlayScale(audioApi) {
-  const scaleNotes = makeOctaveScaleNoteSequence();
+  const scaleNotes = makeOctaveScaleNoteSequence('c', 4, 'major');
 
   let currentNoteIndex = 0;
   let prevNoteIndex = null;
@@ -133,8 +133,8 @@ function addEvents(events, newEvents) {
   return updatedEvents;
 }
 
-function makeOctaveScaleNoteSequence() {
-  const scaleNotes = Scale.scale('c4 major').notes;
+function makeOctaveScaleNoteSequence(key, octave, scaleType) {
+  const scaleNotes = Scale.scale(`${key}${octave} ${scaleType}`).notes;
 
   scaleNotes.push(transposeByOctaves(Tonal.note(scaleNotes[0]), 1));
 
@@ -193,7 +193,8 @@ const buttonStyle = {
   color: 'black',
   padding: 4,
   paddingBottom: 8,
-  minHeight: 40,
+  height: 46,
+  overflow: 'hidden',
 };
 
 const ChordButton = React.memo(
@@ -262,6 +263,16 @@ function App() {
     'includeExtra',
     false
   );
+  const [lastChord, setLastChord] = React.useState(null);
+  const [octave, setOctave] = useLocalStorage('octave', 4);
+  const [scaleType, setScaleType] = useLocalStorage('scaleType', 'major');
+
+  const scaleData = React.useMemo(() => makeScaleData(key, scaleType), [
+    key,
+    scaleType,
+  ]);
+
+  const toggleExtra = React.useCallback(() => setIncludeExtra(s => !s));
 
   const [events, setEvents] = React.useState([]);
 
@@ -271,7 +282,7 @@ function App() {
         return;
       }
       let updatedEvents = events;
-      const scaleNotes = makeOctaveScaleNoteSequence();
+      const scaleNotes = makeOctaveScaleNoteSequence(key, octave, scaleType);
       const currentTime = audioApi.actx.currentTime;
 
       let lastStartTimeOffset = 0;
@@ -316,17 +327,6 @@ function App() {
     },
     [setEvents, audioApi]
   );
-
-  const [lastChord, setLastChord] = React.useState(null);
-  const [octave, setOctave] = useLocalStorage('octave', 4);
-  const [scaleType, setScaleType] = useLocalStorage('scaleType', 'major');
-
-  const scaleData = React.useMemo(() => makeScaleData(key, scaleType), [
-    key,
-    scaleType,
-  ]);
-
-  const toggleExtra = React.useCallback(() => setIncludeExtra(s => !s));
 
   // startup
   React.useEffect(() => {
