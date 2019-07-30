@@ -20,8 +20,13 @@
         if (AWPF.isAudioWorkletPolyfilled)
           document.getElementById("unsupported").style.display = "block";          
         DX7.importScripts(actx).then(() => {
-          dx7 = new DX7(actx);
-          dx7.connect(actx.destination);
+          dx7 = new DX7(actx/*, {samplesPerBuffer: 256}*/);
+          var gainNode = AudioContext.createGain();
+
+          dx7.connect(gainNode);
+          gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+
+          gainNode.connect(actx.destination)
           initGUI(new DX7Library());
           initMidi();      
         });
