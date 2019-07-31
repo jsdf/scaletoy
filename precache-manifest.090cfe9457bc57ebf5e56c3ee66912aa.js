@@ -1,6 +1,6 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "39e3bf2fbdfd9877d7bf99c8c76e1896",
+    "revision": "5929baabd0adaf93c2e29a1a077dcc76",
     "url": "/scaletoy/index.html"
   },
   {
