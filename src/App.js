@@ -9,10 +9,16 @@ import useLocalStorage from './useLocalStorage';
 
 /* global initDX7 */
 
-const SHOW_NOTE_NAMES = false;
-const SHOW_NOTE_OCTS = false;
-const SHOW_FULL_CHORD_NAMES = true;
+const SHOW_NOTE_NAMES = true;
+const SHOW_NOTE_OCTS = true;
+const SHOW_FULL_CHORD_NAMES = false;
 const SIZE_ASC = true;
+
+const strummingTimes = [0, 10, 30, 50, 75, 100, 150, 200];
+const strummingTimesIndex = {};
+strummingTimes.forEach((v, i) => {
+  strummingTimesIndex[v] = i;
+});
 
 function transposeByOctaves(note, shift) {
   return `${note.pc}${note.oct + shift}`;
@@ -24,6 +30,8 @@ function getChordsBySize(chords, key) {
     .sort((a, b) => a.intervals.length - b.intervals.length)
     .map(chord => `${chord.tonic}${chord.aliases[0]}`);
 }
+
+const keys = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B'];
 
 const scaleTypesPosNames = {
   major: ['I', 'ii', 'iii', 'VI', 'V', 'vi', 'vii*'],
@@ -44,17 +52,7 @@ function getScaleChords(key, scaleType) {
   );
 }
 
-// get the notes for a chord, for an octave
-function getReifiedNotesForChord(chordName, octave) {
-  const chordData = Chord.chord(chordName);
-  const tonicReified = chordData.tonic + octave;
-  const notes = chordData.intervals.map(interval =>
-    Tonal.transpose(tonicReified, interval)
-  );
-  return notes;
-}
-
-const bpm = 120;
+const bpm = 140;
 const beatDurationSeconds = (1 / bpm) * 60;
 
 const NOTE_ON = 0x90;
@@ -141,8 +139,43 @@ function makeOctaveScaleNoteSequence(key, octave, scaleType) {
   return scaleNotes;
 }
 
-function makeScaleData(key, scaleType) {
-  const scalePitchClasses = Scale.scale(`${key} ${scaleType}`).notes;
+// get the notes for a chord, for an octave
+function getReifiedNotesForChord(chordName, octave) {
+  const chordData = Chord.chord(chordName);
+  const tonicReified = chordData.tonic + octave;
+  const notes = chordData.intervals.map(interval =>
+    Tonal.transpose(tonicReified, interval)
+  );
+  return notes;
+}
+
+// we need to make sure that the tonic is from the correct octave when the
+// scale spans multiple octaves
+function getReifiedNotesForChordForScale(chordName, scalePitchClassesNotesMap) {
+  const chordData = Chord.chord(chordName);
+  const tonicReified = scalePitchClassesNotesMap[chordData.tonic];
+  const notes = chordData.intervals.map(interval =>
+    Tonal.transpose(tonicReified, interval)
+  );
+  return notes;
+}
+
+function reifyScaleNotesWithOctave(scale, octave) {
+  return scale.intervals.map(interval =>
+    Tonal.transpose(`${scale.tonic}${octave}`, interval)
+  );
+}
+
+function makeScaleData(key, scaleType, octave) {
+  const scale = Scale.scale(`${key} ${scaleType}`);
+  const scalePitchClasses = scale.notes;
+
+  const scaleNotes = reifyScaleNotesWithOctave(scale, octave);
+  const scalePitchClassesNotesMap = {};
+  scaleNotes.forEach(noteName => {
+    scalePitchClassesNotesMap[Tonal.note(noteName).pc] = noteName;
+  });
+
   const scalePosChords = new Map(
     getScaleChords(key, scaleType).map((chordNames, pos) => {
       return [
@@ -154,6 +187,10 @@ function makeScaleData(key, scaleType) {
             pos,
             chord,
             chordType: scaleTypesChordPatterns[scaleType][pos],
+            chordNotesForOctave: getReifiedNotesForChordForScale(
+              chordName,
+              scalePitchClassesNotesMap
+            ),
             chordName,
             size:
               chord.intervals.length * (chord.quality === 'Unknown' ? -1 : 1),
@@ -176,6 +213,7 @@ function makeScaleData(key, scaleType) {
     key,
     scalePitchClasses,
     scalePosChords,
+    scaleNotes,
     sizes: Array.from(sizes).sort((a, b) => a - b),
   };
 }
@@ -198,7 +236,7 @@ const buttonStyle = {
 };
 
 const ChordButton = React.memo(
-  ({chordData, playChord, setLastChord, octave, selected}) => {
+  ({chordData, playChord, setLastChord, octave, strumming, selected}) => {
     return (
       <div
         style={{
@@ -208,7 +246,7 @@ const ChordButton = React.memo(
           borderColor: selected ? 'rgba(0,0,0,0.2)' : 'transparent',
         }}
         onClick={() => {
-          playChord(chordData, octave);
+          playChord(chordData, octave, strumming);
           setLastChord(chordData.chordName);
           console.log(chordData);
         }}
@@ -230,9 +268,7 @@ const ChordButton = React.memo(
           {true && (
             <div>
               {SHOW_NOTE_NAMES && SHOW_NOTE_OCTS && (
-                <small>
-                  {getReifiedNotesForChord(chordData.chordName, octave).join()}
-                </small>
+                <small>{chordData.chordNotesForOctave.join()}</small>
               )}
 
               {SHOW_NOTE_NAMES && !SHOW_NOTE_OCTS && (
@@ -257,7 +293,11 @@ function App() {
     [audioApi]
   );
 
-  const [key, setKey] = useLocalStorage('key', 'c');
+  const [key, setKey] = useLocalStorage('key', 'C');
+  const [strumming, setStrumming] = useLocalStorage(
+    'strumming',
+    strummingTimes[2]
+  );
 
   const [includeExtra, setIncludeExtra] = useLocalStorage(
     'includeExtra',
@@ -267,9 +307,10 @@ function App() {
   const [octave, setOctave] = useLocalStorage('octave', 4);
   const [scaleType, setScaleType] = useLocalStorage('scaleType', 'major');
 
-  const scaleData = React.useMemo(() => makeScaleData(key, scaleType), [
+  const scaleData = React.useMemo(() => makeScaleData(key, scaleType, octave), [
     key,
     scaleType,
+    octave,
   ]);
 
   const toggleExtra = React.useCallback(() => setIncludeExtra(s => !s));
@@ -279,12 +320,13 @@ function App() {
   const playScale = React.useCallback(() => {
     setEvents(events => {
       if (audioApi == null) {
-        return;
+        return events;
       }
       let updatedEvents = events;
-      const scaleNotes = makeOctaveScaleNoteSequence(key, octave, scaleType);
+      const scaleNotes = scaleData.scaleNotes.slice();
+      scaleNotes.push(Tonal.transpose(scaleNotes[0], '8P'));
       const currentTime = audioApi.actx.currentTime;
-
+      debugger;
       let lastStartTimeOffset = 0;
       scaleNotes.forEach(noteName => {
         lastStartTimeOffset += beatDurationSeconds;
@@ -299,26 +341,27 @@ function App() {
 
       return updatedEvents;
     });
-  });
+  }, [setEvents, audioApi, scaleData]);
 
   const playChord = React.useCallback(
-    (chordData, octave) => {
-      const chordNotes = getReifiedNotesForChord(chordData.chordName, octave);
+    (chordData, octave, strumming) => {
+      const chordNotes = chordData.chordNotesForOctave;
 
       setEvents(events => {
         if (audioApi == null) {
-          return;
+          return events;
         }
         let updatedEvents = events;
 
         const currentTime = audioApi.actx.currentTime;
 
         chordNotes.forEach((noteName, i) => {
+          const strumDelay = i * (strumming / 1000);
           updatedEvents = playNote(
             updatedEvents,
             noteName,
-            currentTime + i * (20 / 1000),
-            currentTime + beatDurationSeconds
+            currentTime + strumDelay,
+            currentTime + beatDurationSeconds + i * (strumming / 1000)
           );
         });
 
@@ -362,7 +405,7 @@ function App() {
             value={scaleData.key}
             onChange={event => setKey(event.currentTarget.value)}
           >
-            {['a', 'b', 'c', 'd', 'e', 'f', 'g'].map(key => (
+            {keys.map(key => (
               <option key={key} value={key}>
                 {key}
               </option>
@@ -396,10 +439,22 @@ function App() {
           </select>
         </label>{' '}
         <label>scale notes: </label>
-        {Array.from(scaleData.scalePosChords.keys())
-          .map(k => scaleData.scalePitchClasses[k])
-          .join()}{' '}
+        {scaleData.scaleNotes.join()}{' '}
         <label>
+          <button onClick={playScale}>play scale</button>{' '}
+          <label>
+            strumming:
+            <input
+              type="range"
+              min={0}
+              max={9}
+              value={strummingTimesIndex[strumming]}
+              onChange={e => {
+                setStrumming(strummingTimes[parseInt(e.currentTarget.value)]);
+              }}
+            />{' '}
+            <input hidden type="number" value={strumming} readOnly />
+          </label>
           <input
             type="checkbox"
             onChange={toggleExtra}
@@ -407,7 +462,6 @@ function App() {
           />
           include extra chords
         </label>
-        <button onClick={playScale}>play scale</button>
       </div>
 
       {scaleData.sizes
@@ -437,6 +491,7 @@ function App() {
                             playChord,
                             setLastChord,
                             octave,
+                            strumming,
                             selected: chordData.chordName === lastChord,
                           }}
                         />
