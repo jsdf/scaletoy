@@ -1,16 +1,16 @@
 {
   "files": {
-    "main.css": "/scaletoy/static/css/main.abd577f3.chunk.css",
-    "main.js": "/scaletoy/static/js/main.294c6441.chunk.js",
-    "main.js.map": "/scaletoy/static/js/main.294c6441.chunk.js.map",
+    "main.css": "/scaletoy/static/css/main.0d535d16.chunk.css",
+    "main.js": "/scaletoy/static/js/main.e9467d91.chunk.js",
+    "main.js.map": "/scaletoy/static/js/main.e9467d91.chunk.js.map",
     "runtime~main.js": "/scaletoy/static/js/runtime~main.a8febe43.js",
     "runtime~main.js.map": "/scaletoy/static/js/runtime~main.a8febe43.js.map",
     "static/js/2.741795ae.chunk.js": "/scaletoy/static/js/2.741795ae.chunk.js",
     "static/js/2.741795ae.chunk.js.map": "/scaletoy/static/js/2.741795ae.chunk.js.map",
     "index.html": "/scaletoy/index.html",
-    "precache-manifest.090cfe9457bc57ebf5e56c3ee66912aa.js": "/scaletoy/precache-manifest.090cfe9457bc57ebf5e56c3ee66912aa.js",
+    "precache-manifest.9a946ab071c4bb6fee86ab6401be934d.js": "/scaletoy/precache-manifest.9a946ab071c4bb6fee86ab6401be934d.js",
     "service-worker.js": "/scaletoy/service-worker.js",
-    "static/css/main.abd577f3.chunk.css.map": "/scaletoy/static/css/main.abd577f3.chunk.css.map",
+    "static/css/main.0d535d16.chunk.css.map": "/scaletoy/static/css/main.0d535d16.chunk.css.map",
     "static/media/logo.svg": "/scaletoy/static/media/logo.5d5d9eef.svg"
   }
 }
