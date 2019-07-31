@@ -282,16 +282,13 @@ const ChordButton = React.memo(
   }
 );
 
-function App() {
-  const [audioApi, setAudioApi] = React.useState(null);
-  const resumeAudio = React.useCallback(
-    () => audioApi && audioApi.actx.resume(),
-    [audioApi]
-  );
-  const suspendAudio = React.useCallback(
-    () => audioApi && audioApi.actx.suspend(),
-    [audioApi]
-  );
+function App({audioApi}) {
+  const resumeAudio = React.useCallback(() => audioApi.actx.resume(), [
+    audioApi,
+  ]);
+  const suspendAudio = React.useCallback(() => audioApi.actx.suspend(), [
+    audioApi,
+  ]);
 
   const [key, setKey] = useLocalStorage('key', 'C');
   const [strumming, setStrumming] = useLocalStorage(
@@ -373,31 +370,17 @@ function App() {
 
   // startup
   React.useEffect(() => {
-    window.onDX7Init = (dx7, actx) => {
-      const newAudioApi = {
-        dx7,
-        actx,
-      };
-
-      // start event-consuming interval
-      setInterval(() => {
-        setEvents(events => onTick(events, newAudioApi));
-      }, 1);
-
-      if (TEST_PLAY_SCALE) {
-        testPlayScale(newAudioApi);
-      }
-
-      setAudioApi(newAudioApi);
-    };
-    initDX7(process.env.PUBLIC_URL);
+    // start event-consuming interval
+    setInterval(() => {
+      setEvents(events => onTick(events, audioApi));
+    }, 1);
   }, []);
 
   return (
     <div className="App">
-      <button onClick={resumeAudio}>start audio</button>
       <button onClick={suspendAudio}>pause audio</button>
-      {audioApi && <Recorder actx={audioApi.actx} inputNode={audioApi.dx7} />}
+      <button onClick={resumeAudio}>resume audio</button>
+      <Recorder actx={audioApi.actx} inputNode={audioApi.dx7} />
       <div>
         <label>
           key:{' '}
@@ -510,4 +493,47 @@ function App() {
   );
 }
 
-export default App;
+function Startup() {
+  const [startedAudio, setStartedAudio] = React.useState(false);
+  const [audioApi, setAudioApi] = React.useState(null);
+
+  React.useEffect(() => {
+    window.onDX7Init = (dx7, actx) => {
+      const newAudioApi = {
+        dx7,
+        actx,
+      };
+      if (TEST_PLAY_SCALE) {
+        testPlayScale(newAudioApi);
+      }
+
+      setAudioApi(newAudioApi);
+    };
+    initDX7(process.env.PUBLIC_URL);
+  }, []);
+
+  if (audioApi && startedAudio) {
+    return <App audioApi={audioApi} />;
+  }
+
+  return (
+    <div className="App">
+      {audioApi ? (
+        <button
+          style={{fontSize: 42, borderRadius: 9, cursor: 'pointer'}}
+          onClick={() => {
+            document.getElementById('content').style.visibility = 'visible';
+            audioApi.actx.resume();
+            setStartedAudio(true);
+          }}
+        >
+          start
+        </button>
+      ) : (
+        'loading'
+      )}
+    </div>
+  );
+}
+
+export default Startup;

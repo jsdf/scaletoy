@@ -55,3 +55,7 @@ body.dark {
 html.dark {
   filter: invert(100%);
 }
+
+#content {
+  visibility: hidden;
+}
