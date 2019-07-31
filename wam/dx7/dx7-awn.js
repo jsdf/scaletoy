@@ -11,8 +11,8 @@ class DX7 extends WAMController {
     super(actx, 'DX7', options);
   }
 
-  static importScripts(actx) {
-    var origin = location.origin + '/wam/';
+  static importScripts(publicUrl, actx) {
+    var origin = publicUrl + '/wam/';
     return new Promise(resolve => {
       actx.audioWorklet.addModule(origin + 'dx7/wasm/dx7.wasm.js').then(() => {
         actx.audioWorklet.addModule(origin + 'dx7/wasm/dx7.js').then(() => {

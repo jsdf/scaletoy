@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/scaletoy/precache-manifest.1cb3e479d4c420e810f946b277724883.js"
+  "/scaletoy/precache-manifest.d8f9d63c5b16cca91bd50dc4bc4a038f.js"
 );
 
 self.addEventListener('message', (event) => {
