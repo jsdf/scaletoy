@@ -390,7 +390,7 @@ function App() {
 
       setAudioApi(newAudioApi);
     };
-    initDX7();
+    initDX7(process.env.PUBLIC_URL);
   }, []);
 
   return (

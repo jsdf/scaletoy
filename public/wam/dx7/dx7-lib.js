@@ -2,14 +2,14 @@
 // bank and patch handling
 // Jari Kleimola 2017 (jari@webaudiomodules.org)
 
-var DX7Library = function(banklist) {
+var DX7Library = function(banklist, publicUrl) {
   this.banks = banklist;
   this.patches = [];
   this.bank = [];
   var self = this;
 
   this.load = filename => {
-    var url = '/wam/dx7/presets/' + filename;
+    var url = publicUrl + '/wam/dx7/presets/' + filename;
     return new Promise((resolve, reject) => {
       fetch(url).then(resp => {
         resp.arrayBuffer().then(data => {
