@@ -200,6 +200,13 @@ function makeScaleData(key, scaleType, octave) {
     })
   );
 
+  const chordDatasByName = new Map(
+    Array.from(scalePosChords.values).map(chordData => [
+      chordData.chordName,
+      chordData,
+    ])
+  );
+
   const sizes = new Set();
 
   scalePosChords.forEach((chordDatas, pos) => {
@@ -214,6 +221,7 @@ function makeScaleData(key, scaleType, octave) {
     scalePitchClasses,
     scalePosChords,
     scaleNotes,
+    chordDatasByName,
     sizes: Array.from(sizes).sort((a, b) => a - b),
   };
 }
@@ -233,6 +241,13 @@ const buttonStyle = {
   paddingBottom: 8,
   height: 46,
   overflow: 'hidden',
+};
+
+const flexColContainer = {
+  display: 'flex',
+};
+const flexCol = {
+  flex: 1,
 };
 
 const ChordButton = React.memo(
@@ -304,6 +319,8 @@ function App({audioApi}) {
   const [octave, setOctave] = useLocalStorage('octave', 4);
   const [scaleType, setScaleType] = useLocalStorage('scaleType', 'major');
 
+  const [history, setHistory] = React.useState([]);
+
   const scaleData = React.useMemo(() => makeScaleData(key, scaleType, octave), [
     key,
     scaleType,
@@ -316,14 +333,10 @@ function App({audioApi}) {
 
   const playScale = React.useCallback(() => {
     setEvents(events => {
-      if (audioApi == null) {
-        return events;
-      }
       let updatedEvents = events;
       const scaleNotes = scaleData.scaleNotes.slice();
       scaleNotes.push(Tonal.transpose(scaleNotes[0], '8P'));
       const currentTime = audioApi.actx.currentTime;
-      debugger;
       let lastStartTimeOffset = 0;
       scaleNotes.forEach(noteName => {
         lastStartTimeOffset += beatDurationSeconds;
@@ -345,9 +358,6 @@ function App({audioApi}) {
       const chordNotes = chordData.chordNotesForOctave;
 
       setEvents(events => {
-        if (audioApi == null) {
-          return events;
-        }
         let updatedEvents = events;
 
         const currentTime = audioApi.actx.currentTime;
@@ -364,6 +374,8 @@ function App({audioApi}) {
 
         return updatedEvents;
       });
+
+      setHistory(s => s.concat(chordData));
     },
     [setEvents, audioApi]
   );
@@ -446,47 +458,75 @@ function App({audioApi}) {
           include extra chords
         </label>
       </div>
+      <div style={flexColContainer}>
+        <div style={flexCol}>
+          {scaleData.sizes
+            .filter(size => (includeExtra ? true : size > 0))
+            .sort((a, b) => (SIZE_ASC ? a - b : b - a))
+            .map((size, sizeIndex) => (
+              <div key={sizeIndex}>
+                {false && <div style={{flex: 1}}>{size}</div>}
+                <br />
+                <div key={size} style={{display: 'flex'}}>
+                  {Array.from(scaleData.scalePosChords).map(
+                    ([pos, chordDatas]) => {
+                      return (
+                        <div key={pos} style={{flex: 1}}>
+                          {sizeIndex === 0 && (
+                            <div>{scaleTypesPosNames[scaleType][pos]}</div>
+                          )}
 
-      {scaleData.sizes
-        .filter(size => (includeExtra ? true : size > 0))
-        .sort((a, b) => (SIZE_ASC ? a - b : b - a))
-        .map((size, sizeIndex) => (
-          <div key={sizeIndex}>
-            {false && <div style={{flex: 1}}>{size}</div>}
-            <br />
-            <div key={size} style={{display: 'flex'}}>
-              {Array.from(scaleData.scalePosChords).map(([pos, chordDatas]) => {
-                return (
-                  <div key={pos} style={{flex: 1}}>
-                    {sizeIndex === 0 && (
-                      <div>{scaleTypesPosNames[scaleType][pos]}</div>
-                    )}
+                          {chordDatas
+                            .filter(chordData => chordData.size === size)
+                            // silly heuristic for simpler chords
+                            .sort(
+                              (a, b) => a.chordName.length - b.chordName.length
+                            )
+                            .map((chordData, i) => (
+                              <ChordButton
+                                key={i}
+                                {...{
+                                  chordData,
+                                  playChord,
+                                  setLastChord,
+                                  octave,
+                                  strumming,
+                                  selected: chordData.chordName === lastChord,
+                                }}
+                              />
+                            ))}
+                        </div>
+                      );
+                    }
+                  )}
+                </div>
+              </div>
+            ))}
+        </div>
 
-                    {chordDatas
-                      .filter(chordData => chordData.size === size)
-                      // silly heuristic for simpler chords
-                      .sort((a, b) => a.chordName.length - b.chordName.length)
-                      .map((chordData, i) => (
-                        <ChordButton
-                          key={i}
-                          {...{
-                            chordData,
-                            playChord,
-                            setLastChord,
-                            octave,
-                            strumming,
-                            selected: chordData.chordName === lastChord,
-                          }}
-                        />
-                      ))}
-                  </div>
-                );
-              })}
-            </div>
+        <div style={{width: '10vw'}}>
+          <div>history</div>
+          <div style={{height: '90vh', overflow: 'auto'}}>
+            {history
+              .slice()
+              .reverse()
+              .map((chordData, i) => (
+                <ChordButton
+                  key={i}
+                  {...{
+                    chordData,
+                    playChord,
+                    setLastChord: () => {},
+                    octave,
+                    strumming,
+                    selected: false,
+                  }}
+                />
+              ))}
           </div>
-        ))}
-
-      <pre style={{height: 300, overflow: 'scroll'}}>
+        </div>
+      </div>
+      <pre style={{height: 300, overflow: 'auto'}}>
         {events.map(ev => JSON.stringify(ev)).join('\n')}
       </pre>
     </div>
