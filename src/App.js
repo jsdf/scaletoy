@@ -440,21 +440,21 @@ function App() {
         </label>{' '}
         <label>scale notes: </label>
         {scaleData.scaleNotes.join()}{' '}
+        <button onClick={playScale}>play scale</button>{' '}
         <label>
-          <button onClick={playScale}>play scale</button>{' '}
-          <label>
-            strumming:
-            <input
-              type="range"
-              min={0}
-              max={9}
-              value={strummingTimesIndex[strumming]}
-              onChange={e => {
-                setStrumming(strummingTimes[parseInt(e.currentTarget.value)]);
-              }}
-            />{' '}
-            <input hidden type="number" value={strumming} readOnly />
-          </label>
+          strumming:
+          <input
+            type="range"
+            min={0}
+            max={9}
+            value={strummingTimesIndex[strumming]}
+            onChange={e => {
+              setStrumming(strummingTimes[parseInt(e.currentTarget.value)]);
+            }}
+          />{' '}
+          <input hidden type="number" value={strumming} readOnly />
+        </label>
+        <label>
           <input
             type="checkbox"
             onChange={toggleExtra}
