@@ -6,6 +6,7 @@ import * as Scale from '@tonaljs/scale';
 import * as Chord from '@tonaljs/chord';
 import Recorder from './Recorder';
 import useLocalStorage from './useLocalStorage';
+import MidiOutput from './MidiOutput';
 
 /* global initDX7 */
 
@@ -88,7 +89,7 @@ function testPlayScale(audioApi) {
   }, beatDurationSeconds * 1000);
 }
 
-function onTick(events, audioApi) {
+function onTick(events, audioApi, midiOut) {
   let i = 0;
   for (; i < events.length; i++) {
     const nextEvent = events[i];
@@ -96,7 +97,14 @@ function onTick(events, audioApi) {
       break;
     }
 
-    audioApi.dx7.onMidi(nextEvent.message);
+    if (midiOut) {
+      if (!midiOut.send) {
+        debugger;
+      }
+      midiOut.send(nextEvent.message);
+    } else {
+      audioApi.dx7.onMidi(nextEvent.message);
+    }
   }
 
   return i === 0 ? events : events.slice(i);
@@ -113,6 +121,7 @@ function playNote(events, noteName, start, end) {
       ev.message[0] = NOTE_OFF;
     }
   });
+
   return addEvents(updatedEvents, [
     {
       message: [NOTE_ON, noteMidi, velocityMidi],
@@ -330,6 +339,7 @@ function App({audioApi}) {
   const toggleExtra = React.useCallback(() => setIncludeExtra(s => !s));
 
   const [events, setEvents] = React.useState([]);
+  const [midiOut, setMidiOut] = React.useState(null);
 
   const playScale = React.useCallback(() => {
     setEvents(events => {
@@ -383,16 +393,20 @@ function App({audioApi}) {
   // startup
   React.useEffect(() => {
     // start event-consuming interval
-    setInterval(() => {
-      setEvents(events => onTick(events, audioApi));
+    const id = setInterval(() => {
+      setEvents(events => onTick(events, audioApi, midiOut));
     }, 1);
-  }, []);
+    return () => {
+      clearInterval(id);
+    };
+  }, [midiOut]);
 
   return (
     <div className="App">
       <button onClick={suspendAudio}>pause audio</button>
       <button onClick={resumeAudio}>resume audio</button>
       <Recorder actx={audioApi.actx} inputNode={audioApi.dx7} />
+      <MidiOutput selectedOutput={midiOut} onChangeOutput={setMidiOut} />
       <div>
         <label>
           key:{' '}
@@ -505,25 +519,35 @@ function App({audioApi}) {
         </div>
 
         <div style={{width: '10vw'}}>
-          <div>history</div>
-          <div style={{height: '90vh', overflow: 'auto'}}>
-            {history
-              .slice()
-              .reverse()
-              .map((chordData, i) => (
-                <ChordButton
-                  key={i}
-                  {...{
-                    chordData,
-                    playChord,
-                    setLastChord: () => {},
-                    octave,
-                    strumming,
-                    selected: false,
-                  }}
-                />
-              ))}
-          </div>
+          <details>
+            <summary>
+              <div>history</div>
+            </summary>
+            <div style={{height: '90vh', overflow: 'auto'}}>
+              {history
+                .slice()
+                .reverse()
+                .map((chordData, i) => (
+                  <ChordButton
+                    key={i}
+                    {...{
+                      chordData,
+                      playChord,
+                      setLastChord: () => {},
+                      octave,
+                      strumming,
+                      selected: false,
+                    }}
+                  />
+                ))}
+              {history.length === 0 && (
+                <div>
+                  <br />
+                  played chords will appear here
+                </div>
+              )}
+            </div>
+          </details>
         </div>
       </div>
       <pre style={{height: 300, overflow: 'auto'}}>
