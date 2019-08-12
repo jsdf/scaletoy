@@ -33,8 +33,6 @@
 }
 
 body {
-  background: #334;
-  color: white;
 }
 
 * {
@@ -49,11 +47,19 @@ button {
 }
 
 /*dark mode*/
-body.dark {
-  background: #ddc;
+body.dark-mode {
+  background: #334;
+  color: white;
 }
-html.dark {
+html.dark-mode {
   filter: invert(100%);
+}
+
+.dark-mode label {
+  color: #bbb;
+}
+.light-mode label {
+  color: #222;
 }
 
 #content {

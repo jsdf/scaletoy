@@ -14,20 +14,23 @@ export default function MidiOutput({onChangeOutput, selectedOutput}) {
   }, []);
 
   return (
-    <select
-      onChange={e => {
-        onChangeOutput(outputs[parseInt(e.currentTarget.value)]);
-      }}
-      value={outputs.indexOf(selectedOutput)}
-    >
-      <option key={-1} value={-1}>
-        (none)
-      </option>
-      {outputs.map((output, i) => (
-        <option key={i} value={i}>
-          {output.name}
+    <label>
+      midi out:{' '}
+      <select
+        onChange={e => {
+          onChangeOutput(outputs[parseInt(e.currentTarget.value)]);
+        }}
+        value={outputs.indexOf(selectedOutput)}
+      >
+        <option key={-1} value={-1}>
+          (none)
         </option>
-      ))}
-    </select>
+        {outputs.map((output, i) => (
+          <option key={i} value={i}>
+            {output.name}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }

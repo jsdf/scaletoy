@@ -61,7 +61,7 @@ export default React.memo(function Recorder(props) {
 
   return (
     <button onClick={toggleRecording}>
-      {recording ? 'stop recording' : 'record'}
+      {recording ? 'stop recording' : 'record audio'}
     </button>
   );
 });

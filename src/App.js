@@ -14,6 +14,7 @@ const SHOW_NOTE_NAMES = true;
 const SHOW_NOTE_OCTS = true;
 const SHOW_FULL_CHORD_NAMES = false;
 const SIZE_ASC = true;
+const SHOW_HISTORY = false;
 
 const strummingTimes = [0, 10, 30, 50, 75, 100, 150, 200];
 const strummingTimesIndex = {};
@@ -518,37 +519,39 @@ function App({audioApi}) {
             ))}
         </div>
 
-        <div style={{width: '10vw'}}>
-          <details>
-            <summary>
-              <div>history</div>
-            </summary>
-            <div style={{height: '90vh', overflow: 'auto'}}>
-              {history
-                .slice()
-                .reverse()
-                .map((chordData, i) => (
-                  <ChordButton
-                    key={i}
-                    {...{
-                      chordData,
-                      playChord,
-                      setLastChord: () => {},
-                      octave,
-                      strumming,
-                      selected: false,
-                    }}
-                  />
-                ))}
-              {history.length === 0 && (
-                <div>
-                  <br />
-                  played chords will appear here
-                </div>
-              )}
-            </div>
-          </details>
-        </div>
+        {SHOW_HISTORY && (
+          <div style={{width: '10vw'}}>
+            <details>
+              <summary>
+                <div>history</div>
+              </summary>
+              <div style={{height: '90vh', overflow: 'auto'}}>
+                {history
+                  .slice()
+                  .reverse()
+                  .map((chordData, i) => (
+                    <ChordButton
+                      key={i}
+                      {...{
+                        chordData,
+                        playChord,
+                        setLastChord: () => {},
+                        octave,
+                        strumming,
+                        selected: false,
+                      }}
+                    />
+                  ))}
+                {history.length === 0 && (
+                  <div>
+                    <br />
+                    played chords will appear here
+                  </div>
+                )}
+              </div>
+            </details>
+          </div>
+        )}
       </div>
       <pre style={{height: 300, overflow: 'auto'}}>
         {events.map(ev => JSON.stringify(ev)).join('\n')}
@@ -557,9 +560,16 @@ function App({audioApi}) {
   );
 }
 
+const CAN_AUTOPLAY_AUDIO = new AudioContext().state == 'running';
+
 function Startup() {
   const [startedAudio, setStartedAudio] = React.useState(false);
   const [audioApi, setAudioApi] = React.useState(null);
+
+  const onStart = React.useCallback(() => {
+    document.getElementById('content').style.visibility = 'visible';
+    setStartedAudio(true);
+  }, [setStartedAudio]);
 
   React.useEffect(() => {
     window.onDX7Init = (dx7, actx) => {
@@ -572,6 +582,9 @@ function Startup() {
       }
 
       setAudioApi(newAudioApi);
+      if (actx.state === 'running') {
+        onStart();
+      }
     };
     initDX7(process.env.PUBLIC_URL);
   }, []);
@@ -586,9 +599,8 @@ function Startup() {
         <button
           style={{fontSize: 42, borderRadius: 9, cursor: 'pointer'}}
           onClick={() => {
-            document.getElementById('content').style.visibility = 'visible';
             audioApi.actx.resume();
-            setStartedAudio(true);
+            onStart();
           }}
         >
           start
