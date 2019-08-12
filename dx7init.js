@@ -14,8 +14,10 @@ function initDX7(publicUrl) {
   var actx = new AudioContext();
   AWPF.polyfill(actx, controllerScripts)
     .then(function() {
-      if (AWPF.isAudioWorkletPolyfilled)
+      if (AWPF.isAudioWorkletPolyfilled) {
         document.getElementById('unsupported').style.display = 'block';
+        document.getElementById('root').style.display = 'none';
+      }
       DX7.importScripts(publicUrl, actx)
         .then(() => {
           window.dx7 = new DX7(actx, {samplesPerBuffer: 256});
