@@ -560,6 +560,31 @@ function App({audioApi}) {
   );
 }
 
+function Theme() {
+  const [darkMode, setDarkMode] = React.useState(false);
+
+  React.useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark-mode');
+    } else {
+      document.documentElement.classList.remove('dark-mode');
+    }
+  }, [darkMode]);
+
+  return (
+    <div style={{position: 'absolute', top: 0, right: 0}}>
+      <label>
+        dark mode:{' '}
+        <input
+          type="checkbox"
+          checked={darkMode}
+          onChange={() => setDarkMode(s => !s)}
+        />
+      </label>
+    </div>
+  );
+}
+
 const CAN_AUTOPLAY_AUDIO = new AudioContext().state == 'running';
 
 function Startup() {
@@ -590,7 +615,12 @@ function Startup() {
   }, []);
 
   if (audioApi && startedAudio) {
-    return <App audioApi={audioApi} />;
+    return (
+      <div>
+        <App audioApi={audioApi} />
+        <Theme />
+      </div>
+    );
   }
 
   return (

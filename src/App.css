@@ -40,28 +40,54 @@ body {
 }
 
 button {
-  background: #334;
-  color: white;
+  background: white;
+  color: #334;
   border-radius: 4px;
   margin: 0 4px;
 }
 
+.dark-mode button {
+  background: #222;
+  color: #eee;
+}
+
 /*dark mode*/
-body.dark-mode {
+.dark-mode body {
   background: #334;
   color: white;
 }
 html.dark-mode {
-  filter: invert(100%);
+  /*filter: invert(100%);*/
 }
 
 .dark-mode label {
   color: #bbb;
 }
-.light-mode label {
+
+.dark-mode label {
+  color: #bbb;
+}
+label {
   color: #222;
+  font-size: 12px;
 }
 
 #content {
   visibility: hidden;
+}
+
+select {
+  background: white;
+  color: #334;
+  height: 20px;
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+.dark-mode select {
+  background: #222;
+  color: #eee;
+  height: 20px;
+  margin-top: 10px;
+  cursor: pointer;
 }
