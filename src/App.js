@@ -7,6 +7,7 @@ import * as Chord from '@tonaljs/chord';
 import Recorder from './Recorder';
 import useLocalStorage from './useLocalStorage';
 import MidiOutput from './MidiOutput';
+import Keyboard from './Keyboard';
 
 /* global initDX7 */
 
@@ -35,15 +36,63 @@ function getChordsBySize(chords, key) {
 
 const keys = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B'];
 
-const scaleTypesPosNames = {
-  major: ['I', 'ii', 'iii', 'VI', 'V', 'vi', 'vii*'],
-  minor: ['i', 'ii*', 'III', 'iv', 'v', 'VI', 'VII'],
-};
-
 const scaleTypesChordPatterns = {
   major: ['major', 'minor', 'minor', 'major', 'major', 'minor', 'diminished'],
   minor: ['minor', 'diminished', 'major', 'minor', 'minor', 'major', 'major'],
+  dorian: ['minor', 'minor', 'major', 'major', 'minor', 'diminished', 'major'],
+  lydian: ['major', 'major', 'minor', 'diminished', 'major', 'minor', 'minor'],
+  phrygian: [
+    'minor',
+    'major',
+    'major',
+    'minor',
+    'diminished',
+    'major',
+    'minor',
+  ],
+  ionian: ['major', 'minor', 'minor', 'major', 'major', 'minor', 'diminished'],
+  mixolydian: [
+    'major',
+    'minor',
+    'diminished',
+    'major',
+    'minor',
+    'minor',
+    'major',
+  ],
+  locrian: ['diminished', 'major', 'minor', 'minor', 'major', 'major', 'minor'],
 };
+
+const allScales = Object.keys(scaleTypesChordPatterns);
+
+const romanNumerals = ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii'];
+// const scaleTypesPosNames = {
+//   major: ['I', 'ii', 'iii', 'VI', 'V', 'vi', 'vii*'],
+//   minor: ['i', 'ii*', 'III', 'iv', 'v', 'VI', 'VII'],
+// };
+const scaleTypesPosNames = Object.keys(scaleTypesChordPatterns).reduce(
+  (acc, scaleName) => {
+    const pattern = scaleTypesChordPatterns[scaleName];
+
+    acc[scaleName] = pattern.map((scaleType, i) => {
+      const pos = romanNumerals[i];
+
+      switch (scaleType) {
+        case 'major':
+          return pos.toUpperCase();
+        case 'minor':
+          return pos;
+        case 'diminished':
+          return pos + '\xB0';
+        default:
+          throw new Error(`unknown scaleType '${scaleType}'`);
+      }
+    });
+
+    return acc;
+  },
+  {}
+);
 
 function getScaleChords(key, scaleType) {
   return Scale.scale(key + ' ' + scaleType).notes.map((pc, pos) =>
@@ -441,7 +490,7 @@ function App({audioApi}) {
             value={scaleType}
             onChange={event => setScaleType(event.currentTarget.value)}
           >
-            {['major', 'minor'].map(key => (
+            {allScales.map(key => (
               <option key={key} value={key}>
                 {key}
               </option>
@@ -473,6 +522,9 @@ function App({audioApi}) {
           include extra chords
         </label>
       </div>
+
+      <Keyboard />
+
       <div style={flexColContainer}>
         <div style={flexCol}>
           {scaleData.sizes
