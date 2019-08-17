@@ -644,7 +644,7 @@ function Startup() {
   const [audioApi, setAudioApi] = React.useState(null);
 
   const onStart = React.useCallback(() => {
-    document.getElementById('content').style.visibility = 'visible';
+    document.querySelector('.dx7').style.visibility = 'visible';
     setStartedAudio(true);
   }, [setStartedAudio]);
 
