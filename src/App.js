@@ -6,16 +6,18 @@ import * as Scale from '@tonaljs/scale';
 import * as Chord from '@tonaljs/chord';
 import Recorder from './Recorder';
 import useLocalStorage from './useLocalStorage';
+import useValueObserver from './useValueObserver';
 import MidiOutput from './MidiOutput';
 import Keyboard from './Keyboard';
-
-/* global initDX7 */
 
 const SHOW_NOTE_NAMES = true;
 const SHOW_NOTE_OCTS = true;
 const SHOW_FULL_CHORD_NAMES = false;
 const SIZE_ASC = true;
 const SHOW_HISTORY = false;
+const USE_SAMPLED_DX7 = Boolean(
+  new URL(document.location).searchParams.get('sampled')
+);
 
 const strummingTimes = [0, 10, 30, 50, 75, 100, 150, 200];
 const strummingTimesIndex = {};
@@ -110,35 +112,6 @@ const NOTE_ON = 0x90;
 const NOTE_OFF = 0x80;
 const velocityMidi = 80;
 
-const TEST_PLAY_SCALE = false;
-
-function testPlayScale(audioApi) {
-  const scaleNotes = makeOctaveScaleNoteSequence('c', 4, 'major');
-
-  let currentNoteIndex = 0;
-  let prevNoteIndex = null;
-
-  setInterval(() => {
-    if (prevNoteIndex != null) {
-      audioApi.dx7.onMidi([
-        NOTE_OFF,
-        Tonal.note(scaleNotes[prevNoteIndex]).midi,
-        velocityMidi,
-      ]);
-    }
-
-    audioApi.dx7.onMidi([
-      NOTE_ON,
-      Tonal.note(scaleNotes[currentNoteIndex]).midi,
-      velocityMidi,
-    ]);
-    prevNoteIndex = currentNoteIndex;
-
-    currentNoteIndex = (currentNoteIndex + 1) % scaleNotes.length;
-    // currentNoteIndex = Math.floor(Math.random() * scaleNotes.length);
-  }, beatDurationSeconds * 1000);
-}
-
 function onTick(events, audioApi, midiOut) {
   let i = 0;
   for (; i < events.length; i++) {
@@ -152,7 +125,7 @@ function onTick(events, audioApi, midiOut) {
         debugger;
       }
       midiOut.send(nextEvent.message);
-    } else {
+    } else if (audioApi.dx7) {
       audioApi.dx7.onMidi(nextEvent.message);
     }
   }
@@ -333,7 +306,7 @@ const ChordButton = React.memo(
           console.log(chordData);
         }}
         onMouseOver={() => {
-          onMouseOver(chordData);
+          onMouseOver(chordData.chordNotesForOctave);
         }}
       >
         <div>
@@ -389,7 +362,7 @@ function App({audioApi}) {
   const [octave, setOctave] = useLocalStorage('octave', 4);
   const [scaleType, setScaleType] = useLocalStorage('scaleType', 'major');
 
-  const [hoveredChord, setHoveredChord] = React.useState(null);
+  const [highlightedKeys, setHighlightedKeys] = React.useState(null);
 
   const [history, setHistory] = React.useState([]);
 
@@ -453,6 +426,10 @@ function App({audioApi}) {
     [setEvents, audioApi]
   );
 
+  useValueObserver(scaleData, () => {
+    setHighlightedKeys(scaleData.scaleNotes);
+  });
+
   // startup
   React.useEffect(() => {
     // start event-consuming interval
@@ -468,9 +445,11 @@ function App({audioApi}) {
     <div className="App">
       <button onClick={suspendAudio}>pause audio</button>
       <button onClick={resumeAudio}>resume audio</button>
-      <Recorder actx={audioApi.actx} inputNode={audioApi.dx7} />
+      {audioApi.dx7 && (
+        <Recorder actx={audioApi.actx} inputNode={audioApi.dx7} />
+      )}
       <MidiOutput selectedOutput={midiOut} onChangeOutput={setMidiOut} />
-      <div>
+      <div onMouseOver={() => setHighlightedKeys(scaleData.scaleNotes)}>
         <label>
           key:{' '}
           <select
@@ -537,7 +516,7 @@ function App({audioApi}) {
       </div>
 
       <Keyboard
-        highlightKeys={hoveredChord ? hoveredChord.chordNotesForOctave : null}
+        highlightKeys={highlightedKeys}
         startOctave={octave}
         octaves={3}
       />
@@ -576,7 +555,7 @@ function App({audioApi}) {
                                   octave,
                                   strumming,
                                   selected: chordData.chordName === lastChord,
-                                  onMouseOver: setHoveredChord,
+                                  onMouseOver: setHighlightedKeys,
                                 }}
                               />
                             ))}
@@ -609,7 +588,7 @@ function App({audioApi}) {
                         octave,
                         strumming,
                         selected: false,
-                        onMouseOver: setHoveredChord,
+                        onMouseOver: setHighlightedKeys,
                       }}
                     />
                   ))}
@@ -668,21 +647,33 @@ function Startup() {
   }, [setStartedAudio]);
 
   React.useEffect(() => {
+    async function initSampled() {
+      const {sampledDX7} = await import('./sampledDX7');
+
+      sampledDX7().then(({dx7, actx}) => {
+        window.initDX7Shim(dx7, actx);
+      });
+    }
     window.onDX7Init = (dx7, actx) => {
+      if (!dx7) {
+        // fall back to sampled
+        return initSampled();
+      }
       const newAudioApi = {
         dx7,
         actx,
       };
-      if (TEST_PLAY_SCALE) {
-        testPlayScale(newAudioApi);
-      }
 
       setAudioApi(newAudioApi);
       if (actx.state === 'running') {
         onStart();
       }
     };
-    initDX7(process.env.PUBLIC_URL);
+    if (USE_SAMPLED_DX7) {
+      initSampled();
+    } else {
+      window.initDX7(process.env.PUBLIC_URL);
+    }
   }, []);
 
   if (audioApi && startedAudio) {

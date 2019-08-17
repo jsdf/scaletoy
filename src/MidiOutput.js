@@ -4,6 +4,9 @@ export default function MidiOutput({onChangeOutput, selectedOutput}) {
   const [outputs, setOutputs] = React.useState([]);
 
   React.useEffect(() => {
+    if (!navigator.requestMIDIAccess) {
+      return;
+    }
     navigator.requestMIDIAccess().then(access => {
       setOutputs(Array.from(access.outputs.values()));
 

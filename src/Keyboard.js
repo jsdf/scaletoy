@@ -32,7 +32,7 @@ const styles = {
     marginTop: 70,
   },
   highlighted: {
-    background: '#ff9',
+    background: 'orange',
   },
   blackKey: {
     position: 'absolute',

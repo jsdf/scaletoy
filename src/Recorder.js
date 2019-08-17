@@ -37,7 +37,7 @@ function makeNewRecorder(actx, inputNode) {
   return mediaRecorder;
 }
 
-export default React.memo(function Recorder(props) {
+function Recorder(props) {
   const recorderRef = React.useRef(
     makeNewRecorder(props.actx, props.inputNode)
   );
@@ -64,4 +64,14 @@ export default React.memo(function Recorder(props) {
       {recording ? 'stop recording' : 'record audio'}
     </button>
   );
-});
+}
+
+function ShimRecorder(props) {
+  if (typeof MediaRecorder == 'undefined') {
+    return <button disabled>[recording not available]</button>;
+  }
+
+  return <Recorder {...props} />;
+}
+
+export default React.memo(ShimRecorder);
