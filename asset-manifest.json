@@ -1,16 +1,24 @@
 {
   "files": {
     "main.css": "/scaletoy/static/css/main.cd556cfb.chunk.css",
-    "main.js": "/scaletoy/static/js/main.87d62f1a.chunk.js",
-    "main.js.map": "/scaletoy/static/js/main.87d62f1a.chunk.js.map",
-    "runtime~main.js": "/scaletoy/static/js/runtime~main.a8febe43.js",
-    "runtime~main.js.map": "/scaletoy/static/js/runtime~main.a8febe43.js.map",
-    "static/js/2.2fb796a5.chunk.js": "/scaletoy/static/js/2.2fb796a5.chunk.js",
-    "static/js/2.2fb796a5.chunk.js.map": "/scaletoy/static/js/2.2fb796a5.chunk.js.map",
+    "main.js": "/scaletoy/static/js/main.d9f4cd85.chunk.js",
+    "main.js.map": "/scaletoy/static/js/main.d9f4cd85.chunk.js.map",
+    "runtime~main.js": "/scaletoy/static/js/runtime~main.7990e1d0.js",
+    "runtime~main.js.map": "/scaletoy/static/js/runtime~main.7990e1d0.js.map",
+    "static/js/2.f1f6db12.chunk.js": "/scaletoy/static/js/2.f1f6db12.chunk.js",
+    "static/js/2.f1f6db12.chunk.js.map": "/scaletoy/static/js/2.f1f6db12.chunk.js.map",
+    "static/js/3.c9fd2c98.chunk.js": "/scaletoy/static/js/3.c9fd2c98.chunk.js",
+    "static/js/3.c9fd2c98.chunk.js.map": "/scaletoy/static/js/3.c9fd2c98.chunk.js.map",
+    "static/js/4.aaf5206e.chunk.js": "/scaletoy/static/js/4.aaf5206e.chunk.js",
+    "static/js/4.aaf5206e.chunk.js.map": "/scaletoy/static/js/4.aaf5206e.chunk.js.map",
     "index.html": "/scaletoy/index.html",
-    "precache-manifest.b2cbcfa7959ab8da81167eb278b3a887.js": "/scaletoy/precache-manifest.b2cbcfa7959ab8da81167eb278b3a887.js",
+    "precache-manifest.3d8621de202d421f477120c5624c57d7.js": "/scaletoy/precache-manifest.3d8621de202d421f477120c5624c57d7.js",
     "service-worker.js": "/scaletoy/service-worker.js",
     "static/css/main.cd556cfb.chunk.css.map": "/scaletoy/static/css/main.cd556cfb.chunk.css.map",
+    "static/media/dexed-epiano-A2.m4a": "/scaletoy/static/media/dexed-epiano-A2.31b946a6.m4a",
+    "static/media/dexed-epiano-C2.m4a": "/scaletoy/static/media/dexed-epiano-C2.27b8774e.m4a",
+    "static/media/dexed-epiano-Ds2.m4a": "/scaletoy/static/media/dexed-epiano-Ds2.afd18e11.m4a",
+    "static/media/dexed-epiano-Fs2.m4a": "/scaletoy/static/media/dexed-epiano-Fs2.bef162da.m4a",
     "static/media/logo.svg": "/scaletoy/static/media/logo.5d5d9eef.svg"
   }
 }
