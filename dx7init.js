@@ -16,7 +16,7 @@ function initDX7(publicUrl) {
     .then(function() {
       if (AWPF.isAudioWorkletPolyfilled) {
         // document.getElementById('unsupported').style.display = 'block';
-        document.querySelector('.dx7').style.display = 'none';
+        // document.querySelector('.dx7').style.display = 'none';
 
         onDX7Init(null, actx);
         return;
