@@ -310,7 +310,15 @@ const flexCol = {
 };
 
 const ChordButton = React.memo(
-  ({chordData, playChord, setLastChord, octave, strumming, selected}) => {
+  ({
+    chordData,
+    playChord,
+    setLastChord,
+    octave,
+    strumming,
+    selected,
+    onMouseOver,
+  }) => {
     return (
       <div
         style={{
@@ -323,6 +331,9 @@ const ChordButton = React.memo(
           playChord(chordData, octave, strumming);
           setLastChord(chordData.chordName);
           console.log(chordData);
+        }}
+        onMouseOver={() => {
+          onMouseOver(chordData);
         }}
       >
         <div>
@@ -377,6 +388,8 @@ function App({audioApi}) {
   const [lastChord, setLastChord] = React.useState(null);
   const [octave, setOctave] = useLocalStorage('octave', 4);
   const [scaleType, setScaleType] = useLocalStorage('scaleType', 'major');
+
+  const [hoveredChord, setHoveredChord] = React.useState(null);
 
   const [history, setHistory] = React.useState([]);
 
@@ -523,7 +536,11 @@ function App({audioApi}) {
         </label>
       </div>
 
-      <Keyboard />
+      <Keyboard
+        highlightKeys={hoveredChord ? hoveredChord.chordNotesForOctave : null}
+        startOctave={octave}
+        octaves={3}
+      />
 
       <div style={flexColContainer}>
         <div style={flexCol}>
@@ -559,6 +576,7 @@ function App({audioApi}) {
                                   octave,
                                   strumming,
                                   selected: chordData.chordName === lastChord,
+                                  onMouseOver: setHoveredChord,
                                 }}
                               />
                             ))}
@@ -591,6 +609,7 @@ function App({audioApi}) {
                         octave,
                         strumming,
                         selected: false,
+                        onMouseOver: setHoveredChord,
                       }}
                     />
                   ))}

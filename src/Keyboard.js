@@ -4,8 +4,6 @@ function range(size, startAt = 0) {
   return [...Array(size).keys()].map(i => i + startAt);
 }
 
-const startOctave = 3;
-const octaves = 2;
 const whiteNotes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
 const notesWithSharps = new Set(['C', 'D', 'F', 'G', 'A']);
 
@@ -31,7 +29,10 @@ const styles = {
   },
   noteLabel: {
     width: 20,
-    marginTop: -20,
+    marginTop: 70,
+  },
+  highlighted: {
+    background: '#ff9',
   },
   blackKey: {
     position: 'absolute',
@@ -40,37 +41,51 @@ const styles = {
     width: 9,
     height: 50,
     background: 'black',
+    border: 'solid 1px black',
 
     zIndex: 1,
   },
 };
 
-export default function Keyboard() {
-  const numKeys = whiteNotes.length * octaves;
+function Keyboard(props: {
+  highlightKeys: Array<string>,
+  startOctave: number,
+  octaves: number,
+}) {
+  const numKeys = whiteNotes.length * props.octaves;
   const keys = [];
 
-  range(octaves, startOctave).forEach((octave, octaveOffset) => {
+  range(props.octaves, props.startOctave).forEach((octave, octaveOffset) => {
     whiteNotes.forEach((note, noteOffset) => {
+      const noteName = note + octave;
+      const noteNameSharp = note + '#' + octave;
       keys.push(
         <div
-          key={note + octave}
+          key={noteName}
           style={{
             ...styles.whiteKey,
+            ...(props.highlightKeys && props.highlightKeys.includes(noteName)
+              ? styles.highlighted
+              : null),
             left:
               (octaveOffset * whiteNotes.length + noteOffset) *
               (styles.whiteKey.width - 1),
           }}
         >
-          <div style={styles.noteLabel}>{note + octave}</div>
+          <div style={styles.noteLabel}>{noteName}</div>
         </div>
       );
 
       if (notesWithSharps.has(note)) {
         keys.push(
           <div
-            key={note + '#' + octave}
+            key={noteNameSharp}
             style={{
               ...styles.blackKey,
+              ...(props.highlightKeys &&
+              props.highlightKeys.includes(noteNameSharp)
+                ? styles.highlighted
+                : null),
               left:
                 (octaveOffset * whiteNotes.length + noteOffset + 1) *
                   (styles.whiteKey.width - 1) -
@@ -89,3 +104,5 @@ export default function Keyboard() {
     </div>
   );
 }
+
+export default React.memo(Keyboard);
