@@ -6,6 +6,7 @@
     "@babel/core": "7.4.3",
     "@svgr/webpack": "4.1.0",
     "@tonaljs/chord": "^3.2.1",
+    "@tonaljs/note": "^3.2.2",
     "@tonaljs/scale": "^3.2.1",
     "@tonaljs/tonal": "^3.2.1",
     "@typescript-eslint/eslint-plugin": "1.6.0",

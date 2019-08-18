@@ -1233,6 +1233,21 @@
   dependencies:
     "@tonaljs/tonal" "^3.2.1"
 
+"@tonaljs/midi@^3.2.2":
+  version "3.2.2"
+  resolved "https://registry.yarnpkg.com/@tonaljs/midi/-/midi-3.2.2.tgz#d16380562ff4e60a3d7c13ec9515c5ec4d6ee1db"
+  integrity sha512-zRtp99uTGK1L0rI/jUbYpnzfJMUQ0l+O0hoj0RALsuuCdr7d3hzl0TOCQGaW7iNrQWhH6dUGwKCFBz7w8iKsuA==
+  dependencies:
+    "@tonaljs/tonal" "^3.2.2"
+
+"@tonaljs/note@^3.2.2":
+  version "3.2.2"
+  resolved "https://registry.yarnpkg.com/@tonaljs/note/-/note-3.2.2.tgz#4011e145d1de9cadc68cfa40d89b2361ac943870"
+  integrity sha512-GS5T8eRQ4ZwtSGdetdrDxG74CEZ+SvW5F3I+rXiLhNdZzgbTqSRu2j1reIpK9WTY9Lmjdz+6nOJYhP9IwdXHTg==
+  dependencies:
+    "@tonaljs/midi" "^3.2.2"
+    "@tonaljs/tonal" "^3.2.2"
+
 "@tonaljs/pcset@^3.2.1":
   version "3.2.1"
   resolved "https://registry.yarnpkg.com/@tonaljs/pcset/-/pcset-3.2.1.tgz#76b9dd2c171c7e117d350ed14877b2c27db2a4ea"
@@ -1264,6 +1279,11 @@
   version "3.2.1"
   resolved "https://registry.yarnpkg.com/@tonaljs/tonal/-/tonal-3.2.1.tgz#46ff32085be94485e63287cd6f377ed47f8148b5"
   integrity sha512-I4Xustr/2FtYKmCMMKGldw+gM8k+UtjP2gcd0gPJF475zIG/Q0F4SGYTDBtHJ59eyAcPsB33/xVM6FCcJtV+WQ==
+
+"@tonaljs/tonal@^3.2.2":
+  version "3.2.2"
+  resolved "https://registry.yarnpkg.com/@tonaljs/tonal/-/tonal-3.2.2.tgz#c330987fe1730ee9bc929c50b2f51bfcc2861f90"
+  integrity sha512-j03zV3gScWyN9uMFlNSB/oQSXYLYrzH2vgkLBo311+dW2t3ChXIqftTI99Z17eEiv2SphU15iQRIoX7xVum4WQ==
 
 "@types/babel__core@^7.1.0":
   version "7.1.1"

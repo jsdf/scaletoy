@@ -4,6 +4,7 @@ import './App.css';
 import * as Tonal from '@tonaljs/tonal';
 import * as Scale from '@tonaljs/scale';
 import * as Chord from '@tonaljs/chord';
+import * as Note from '@tonaljs/note';
 import Recorder from './Recorder';
 import useLocalStorage from './useLocalStorage';
 import useValueObserver from './useValueObserver';
@@ -187,7 +188,7 @@ function getReifiedNotesForChordForScale(chordName, scalePitchClassesNotesMap) {
   const chordData = Chord.chord(chordName);
   const tonicReified = scalePitchClassesNotesMap[chordData.tonic];
   const notes = chordData.intervals.map(interval =>
-    Tonal.transpose(tonicReified, interval)
+    Note.simplify(Tonal.transpose(tonicReified, interval))
   );
   return notes;
 }
