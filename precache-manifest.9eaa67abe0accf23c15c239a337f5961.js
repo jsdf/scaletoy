@@ -1,31 +1,31 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "f835791516ae3918453e302e4f1f316d",
+    "revision": "65bd8ccc6e363936f1a36708a2a53958",
     "url": "/scaletoy/index.html"
   },
   {
-    "revision": "0fe610e972d0a0712003",
+    "revision": "f9ba47795ea6c310e253",
     "url": "/scaletoy/static/css/main.cd556cfb.chunk.css"
   },
   {
-    "revision": "60505bc1efb1ec36cf39",
-    "url": "/scaletoy/static/js/2.85b3396e.chunk.js"
+    "revision": "0ea60c8f2564dcd861aa",
+    "url": "/scaletoy/static/js/2.65ef8b0e.chunk.js"
   },
   {
-    "revision": "4a42ed6a42ed5451eaa5",
-    "url": "/scaletoy/static/js/3.6c8b2daa.chunk.js"
+    "revision": "66b8e5d283585ac4e04d",
+    "url": "/scaletoy/static/js/3.311eefb8.chunk.js"
   },
   {
     "revision": "ce1a641b1fde1f88a3a2",
     "url": "/scaletoy/static/js/4.c4b43525.chunk.js"
   },
   {
-    "revision": "0fe610e972d0a0712003",
-    "url": "/scaletoy/static/js/main.6c878b09.chunk.js"
+    "revision": "f9ba47795ea6c310e253",
+    "url": "/scaletoy/static/js/main.2eb41769.chunk.js"
   },
   {
-    "revision": "9e2f9832b1e00040c21e",
-    "url": "/scaletoy/static/js/runtime~main.bd4cc346.js"
+    "revision": "a551085858b28c586e43",
+    "url": "/scaletoy/static/js/runtime~main.598a68cf.js"
   },
   {
     "revision": "31b946a6f352df5ea4a994fd07f3461c",
