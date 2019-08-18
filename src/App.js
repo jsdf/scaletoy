@@ -6,7 +6,7 @@ import * as Scale from '@tonaljs/scale';
 import * as Chord from '@tonaljs/chord';
 import * as Note from '@tonaljs/note';
 import Recorder from './Recorder';
-import useLocalStorage from './useLocalStorage';
+import useQueryParam, {QUERY_PARAM_FORMATS} from './useQueryParam';
 import useValueObserver from './useValueObserver';
 import MidiOutput from './MidiOutput';
 import Keyboard from './Keyboard';
@@ -351,19 +351,29 @@ function App({audioApi}) {
     audioApi,
   ]);
 
-  const [key, setKey] = useLocalStorage('key', 'C');
-  const [strumming, setStrumming] = useLocalStorage(
+  const [key, setKey] = useQueryParam('key', 'C', QUERY_PARAM_FORMATS.string);
+  const [strumming, setStrumming] = useQueryParam(
     'strumming',
-    strummingTimes[2]
+    strummingTimes[2],
+    QUERY_PARAM_FORMATS.integer
   );
 
-  const [includeExtra, setIncludeExtra] = useLocalStorage(
+  const [includeExtra, setIncludeExtra] = useQueryParam(
     'includeExtra',
-    false
+    false,
+    QUERY_PARAM_FORMATS.boolean
   );
   const [lastChord, setLastChord] = React.useState(null);
-  const [octave, setOctave] = useLocalStorage('octave', 4);
-  const [scaleType, setScaleType] = useLocalStorage('scaleType', 'major');
+  const [octave, setOctave] = useQueryParam(
+    'octave',
+    4,
+    QUERY_PARAM_FORMATS.integer
+  );
+  const [scaleType, setScaleType] = useQueryParam(
+    'scaleType',
+    'major',
+    QUERY_PARAM_FORMATS.string
+  );
 
   const [highlightedKeys, setHighlightedKeys] = React.useState(null);
 
