@@ -15,7 +15,7 @@ const styles = {
     display: 'inline-block',
     position: 'relative',
     height: 70,
-    marginTop: 20,
+    marginBottom: 20,
   },
   whiteKey: {
     position: 'absolute',

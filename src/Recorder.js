@@ -1,17 +1,5 @@
 import React from 'react';
-
-function saveData(blob, fileName) {
-  var a = document.createElement('a');
-  document.body.appendChild(a);
-  a.style = 'display: none';
-
-  const url = URL.createObjectURL(blob);
-  a.href = url;
-  a.download = fileName;
-  a.click();
-  URL.revokeObjectURL(url);
-  a.remove();
-}
+import downloadFile from './downloadFile';
 
 function makeNewRecorder(actx, inputNode) {
   const chunks = [];
@@ -27,11 +15,10 @@ function makeNewRecorder(actx, inputNode) {
   mediaRecorder.onstop = function(evt) {
     // Make blob out of our blobs, and open it.
     var blob = new Blob(chunks, {type: 'audio/ogg; codecs=opus'});
-    const audioEl = document.createElement('audio');
 
     const fileName = 'audio.ogg';
 
-    saveData(blob, fileName);
+    downloadFile(blob, fileName);
   };
 
   return mediaRecorder;

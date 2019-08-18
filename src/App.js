@@ -10,12 +10,13 @@ import useLocalStorage from './useLocalStorage';
 import useValueObserver from './useValueObserver';
 import MidiOutput from './MidiOutput';
 import Keyboard from './Keyboard';
+import MidiExport from './MidiExport';
 
 const SHOW_NOTE_NAMES = true;
 const SHOW_NOTE_OCTS = true;
 const SHOW_FULL_CHORD_NAMES = false;
 const SIZE_ASC = true;
-const SHOW_HISTORY = false;
+const SHOW_HISTORY = true;
 const USE_SAMPLED_DX7 = Boolean(
   new URL(document.location).searchParams.get('sampled')
 );
@@ -274,6 +275,7 @@ const buttonStyle = {
   paddingBottom: 8,
   height: 46,
   overflow: 'hidden',
+  textAlign: 'center',
 };
 
 const flexColContainer = {
@@ -366,6 +368,7 @@ function App({audioApi}) {
   const [highlightedKeys, setHighlightedKeys] = React.useState(null);
 
   const [history, setHistory] = React.useState([]);
+  const clearHistory = React.useCallback(() => setHistory([]), [setHistory]);
 
   const scaleData = React.useMemo(() => makeScaleData(key, scaleType, octave), [
     key,
@@ -427,9 +430,12 @@ function App({audioApi}) {
     [setEvents, audioApi]
   );
 
-  useValueObserver(scaleData, () => {
-    setHighlightedKeys(scaleData.scaleNotes);
-  });
+  useValueObserver(
+    scaleData,
+    React.useCallback(() => {
+      setHighlightedKeys(scaleData.scaleNotes);
+    }, [scaleData])
+  );
 
   // startup
   React.useEffect(() => {
@@ -498,7 +504,7 @@ function App({audioApi}) {
           <input
             type="range"
             min={0}
-            max={9}
+            max={strummingTimes.length - 1}
             value={strummingTimesIndex[strumming]}
             onChange={e => {
               setStrumming(strummingTimes[parseInt(e.currentTarget.value)]);
@@ -521,6 +527,49 @@ function App({audioApi}) {
         startOctave={octave}
         octaves={3}
       />
+
+      {SHOW_HISTORY && (
+        <div style={{textAlign: 'left'}}>
+          <details>
+            <summary style={{textAlign: 'left'}}>
+              <div style={{display: 'initial'}}>history/export</div>
+            </summary>
+            <MidiExport
+              bpm={bpm}
+              history={history}
+              strumming={strumming}
+              beatDurationSeconds={beatDurationSeconds}
+            />
+            <button onClick={clearHistory}>clear history</button>
+            <div style={{width: `90vw`, overflow: 'auto', display: 'flex'}}>
+              {history
+                .slice()
+                .reverse()
+                .map((chordData, i) => (
+                  <div key={i} style={{width: `${(1 / 7) * 100}vw`}}>
+                    <ChordButton
+                      {...{
+                        chordData,
+                        playChord,
+                        setLastChord: () => {},
+                        octave,
+                        strumming,
+                        selected: false,
+                        onMouseOver: setHighlightedKeys,
+                      }}
+                    />
+                  </div>
+                ))}
+              {history.length === 0 && (
+                <div>
+                  <br />
+                  played chords will appear here
+                </div>
+              )}
+            </div>
+          </details>
+        </div>
+      )}
 
       <div style={flexColContainer}>
         <div style={flexCol}>
@@ -568,41 +617,6 @@ function App({audioApi}) {
               </div>
             ))}
         </div>
-
-        {SHOW_HISTORY && (
-          <div style={{width: '10vw'}}>
-            <details>
-              <summary>
-                <div>history</div>
-              </summary>
-              <div style={{height: '90vh', overflow: 'auto'}}>
-                {history
-                  .slice()
-                  .reverse()
-                  .map((chordData, i) => (
-                    <ChordButton
-                      key={i}
-                      {...{
-                        chordData,
-                        playChord,
-                        setLastChord: () => {},
-                        octave,
-                        strumming,
-                        selected: false,
-                        onMouseOver: setHighlightedKeys,
-                      }}
-                    />
-                  ))}
-                {history.length === 0 && (
-                  <div>
-                    <br />
-                    played chords will appear here
-                  </div>
-                )}
-              </div>
-            </details>
-          </div>
-        )}
       </div>
       <pre style={{height: 300, overflow: 'auto'}}>
         {events.map(ev => JSON.stringify(ev)).join('\n')}

@@ -9,6 +9,7 @@
     "@tonaljs/note": "^3.2.2",
     "@tonaljs/scale": "^3.2.1",
     "@tonaljs/tonal": "^3.2.1",
+    "@tonejs/midi": "^2.0.7",
     "@typescript-eslint/eslint-plugin": "1.6.0",
     "@typescript-eslint/parser": "1.6.0",
     "babel-eslint": "10.0.1",
