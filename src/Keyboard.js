@@ -1,4 +1,6 @@
 import React from 'react';
+import * as Tonal from '@tonaljs/tonal';
+import * as Note from '@tonaljs/note';
 
 function range(size, startAt = 0) {
   return [...Array(size).keys()].map(i => i + startAt);
@@ -15,6 +17,7 @@ const styles = {
     display: 'inline-block',
     position: 'relative',
     height: 70,
+    marginTop: 16,
     marginBottom: 20,
   },
   whiteKey: {
@@ -55,6 +58,22 @@ function Keyboard(props: {
   const numKeys = whiteNotes.length * props.octaves;
   const keys = [];
 
+  const {highlightKeys} = props;
+
+  const highlightKeysSharpified = React.useMemo(
+    () =>
+      highlightKeys
+        ? highlightKeys.map(noteName => {
+            if (Tonal.note(noteName).acc === 'b') {
+              return Note.enharmonic(noteName);
+            }
+
+            return noteName;
+          })
+        : null,
+    [highlightKeys]
+  );
+
   range(props.octaves, props.startOctave).forEach((octave, octaveOffset) => {
     whiteNotes.forEach((note, noteOffset) => {
       const noteName = note + octave;
@@ -64,7 +83,8 @@ function Keyboard(props: {
           key={noteName}
           style={{
             ...styles.whiteKey,
-            ...(props.highlightKeys && props.highlightKeys.includes(noteName)
+            ...(highlightKeysSharpified &&
+            highlightKeysSharpified.includes(noteName)
               ? styles.highlighted
               : null),
             left:
@@ -82,8 +102,8 @@ function Keyboard(props: {
             key={noteNameSharp}
             style={{
               ...styles.blackKey,
-              ...(props.highlightKeys &&
-              props.highlightKeys.includes(noteNameSharp)
+              ...(highlightKeysSharpified &&
+              highlightKeysSharpified.includes(noteNameSharp)
                 ? styles.highlighted
                 : null),
               left:
