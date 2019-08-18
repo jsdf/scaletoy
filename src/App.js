@@ -534,13 +534,15 @@ function App({audioApi}) {
             <summary style={{textAlign: 'left'}}>
               <div style={{display: 'initial'}}>history/export</div>
             </summary>
-            <MidiExport
-              bpm={bpm}
-              history={history}
-              strumming={strumming}
-              beatDurationSeconds={beatDurationSeconds}
-            />
-            <button onClick={clearHistory}>clear history</button>
+            <div style={{padding: '8px 0'}}>
+              <MidiExport
+                bpm={bpm}
+                history={history}
+                strumming={strumming}
+                beatDurationSeconds={beatDurationSeconds}
+              />
+              <button onClick={clearHistory}>clear history</button>
+            </div>
             <div style={{width: `90vw`, overflow: 'auto', display: 'flex'}}>
               {history
                 .slice()
@@ -561,10 +563,7 @@ function App({audioApi}) {
                   </div>
                 ))}
               {history.length === 0 && (
-                <div>
-                  <br />
-                  played chords will appear here
-                </div>
+                <div>played chords will appear here</div>
               )}
             </div>
           </details>

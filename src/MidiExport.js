@@ -13,7 +13,7 @@ export default function({history, beatDurationSeconds, bpm, strumming}) {
 
     history.forEach((chordData, eventIdx) => {
       const chordNotes = chordData.chordNotesForOctave;
-      const beatStart = eventIdx * beatDurationSeconds * 4;
+      const beatStart = eventIdx * beatDurationSeconds * 2;
       const strummingSeconds = strumming / 1000;
 
       chordNotes.forEach((noteName, i) => {
