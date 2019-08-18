@@ -13,5 +13,5 @@ export default function useValueObserver(
     if (prevValue !== currentValue) {
       onChange(currentValue, prevValue);
     }
-  }, [currentValue]);
+  }, [currentValue, onChange]);
 }
