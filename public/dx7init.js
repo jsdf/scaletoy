@@ -1,5 +1,15 @@
 function initDX7(publicUrl) {
-  var banklist = ['ROM1A.SYX', 'ENO.SYX'];
+  var banklist = [
+    'rom1a.syx',
+    'rom1b.syx',
+    'rom2a.syx',
+    'rom2b.syx',
+    'rom3a.syx',
+    'rom3b.syx',
+    'rom4a.syx',
+    'rom4b.syx',
+    'eno.syx',
+  ];
 
   const errHandler = e => {
     console.error(e);
