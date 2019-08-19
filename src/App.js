@@ -376,6 +376,9 @@ function App({audioApi}) {
   );
 
   const [highlightedKeys, setHighlightedKeys] = React.useState(null);
+  const setHighlightedChord = React.useCallback(keys =>
+    setHighlightedKeys({keys, type: 'chord'})
+  );
 
   const [history, setHistory] = React.useState([]);
   const clearHistory = React.useCallback(() => setHistory([]), [setHistory]);
@@ -385,6 +388,9 @@ function App({audioApi}) {
     scaleType,
     octave,
   ]);
+  const setHighlightedScale = React.useCallback(() => {
+    setHighlightedKeys({keys: scaleData.scaleNotes, type: 'scale'});
+  }, [scaleData]);
 
   const toggleExtra = React.useCallback(() => setIncludeExtra(s => !s));
 
@@ -440,12 +446,7 @@ function App({audioApi}) {
     [setEvents, audioApi]
   );
 
-  useValueObserver(
-    scaleData,
-    React.useCallback(() => {
-      setHighlightedKeys(scaleData.scaleNotes);
-    }, [scaleData])
-  );
+  useValueObserver(scaleData, setHighlightedScale);
 
   // startup
   React.useEffect(() => {
@@ -466,7 +467,7 @@ function App({audioApi}) {
         <Recorder actx={audioApi.actx} inputNode={audioApi.dx7} />
       )}
       <MidiOutput selectedOutput={midiOut} onChangeOutput={setMidiOut} />
-      <div onMouseOver={() => setHighlightedKeys(scaleData.scaleNotes)}>
+      <div onMouseOver={setHighlightedScale}>
         <label>
           key:{' '}
           <select
@@ -533,9 +534,10 @@ function App({audioApi}) {
       </div>
 
       <Keyboard
-        highlightKeys={highlightedKeys}
+        highlightKeys={highlightedKeys ? highlightedKeys.keys : null}
         startOctave={octave}
         octaves={3}
+        highlightType={highlightedKeys ? highlightedKeys.type : 'scale'}
       />
 
       {SHOW_HISTORY && (
@@ -567,7 +569,7 @@ function App({audioApi}) {
                         octave,
                         strumming,
                         selected: false,
-                        onMouseOver: setHighlightedKeys,
+                        onMouseOver: setHighlightedChord,
                       }}
                     />
                   </div>
@@ -614,7 +616,7 @@ function App({audioApi}) {
                                   octave,
                                   strumming,
                                   selected: chordData.chordName === lastChord,
-                                  onMouseOver: setHighlightedKeys,
+                                  onMouseOver: setHighlightedChord,
                                 }}
                               />
                             ))}

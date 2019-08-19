@@ -50,15 +50,21 @@ const styles = {
   },
 };
 
+const highlightTypeColors = {
+  scale: '#4287f5',
+  chord: 'orange',
+};
+
 function Keyboard(props: {
   highlightKeys: Array<string>,
   startOctave: number,
   octaves: number,
+  highlightType: string,
 }) {
   const numKeys = whiteNotes.length * props.octaves;
   const keys = [];
 
-  const {highlightKeys} = props;
+  const {highlightKeys, highlightType} = props;
 
   const highlightKeysSharpified = React.useMemo(
     () =>
@@ -85,7 +91,7 @@ function Keyboard(props: {
             ...styles.whiteKey,
             ...(highlightKeysSharpified &&
             highlightKeysSharpified.includes(noteName)
-              ? styles.highlighted
+              ? {background: highlightTypeColors[highlightType]}
               : null),
             left:
               (octaveOffset * whiteNotes.length + noteOffset) *
@@ -104,7 +110,7 @@ function Keyboard(props: {
               ...styles.blackKey,
               ...(highlightKeysSharpified &&
               highlightKeysSharpified.includes(noteNameSharp)
-                ? styles.highlighted
+                ? {background: highlightTypeColors[highlightType]}
                 : null),
               left:
                 (octaveOffset * whiteNotes.length + noteOffset + 1) *
