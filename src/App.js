@@ -1,6 +1,7 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
+import {knuthShuffle} from 'knuth-shuffle';
 import * as Tonal from '@tonaljs/tonal';
 import * as Scale from '@tonaljs/scale';
 import * as Chord from '@tonaljs/chord';
@@ -285,6 +286,7 @@ const ChordButton = React.memo(
     setLastChord,
     octave,
     strumming,
+    strumMode,
     selected,
     onMouseOver,
   }) => {
@@ -297,7 +299,7 @@ const ChordButton = React.memo(
           borderColor: selected ? 'rgba(0,0,0,0.2)' : 'transparent',
         }}
         onClick={() => {
-          playChord(chordData, octave, strumming);
+          playChord(chordData, octave, strumming, strumMode);
           setLastChord(chordData.chordName);
           console.log(chordData);
         }}
@@ -349,6 +351,12 @@ function App({audioApi}) {
     'strumming',
     strummingTimes[2],
     QUERY_PARAM_FORMATS.integer
+  );
+
+  const [strumMode, setStrumMode] = useQueryParam(
+    'strumMode',
+    'up',
+    QUERY_PARAM_FORMATS.string
   );
 
   const [includeExtra, setIncludeExtra] = useQueryParam(
@@ -413,7 +421,7 @@ function App({audioApi}) {
   }, [setEvents, audioApi, scaleData]);
 
   const playChord = React.useCallback(
-    (chordData, octave, strumming) => {
+    (chordData, octave, strumming, strumMode) => {
       const chordNotes = chordData.chordNotesForOctave;
 
       setEvents(events => {
@@ -421,7 +429,15 @@ function App({audioApi}) {
 
         const currentTime = audioApi.actx.currentTime;
 
-        chordNotes.forEach((noteName, i) => {
+        let notes = chordNotes.slice();
+
+        if (strumMode === 'down') {
+          notes.reverse();
+        } else if (strumMode === 'random') {
+          knuthShuffle(notes);
+        }
+
+        notes.forEach((noteName, i) => {
           const strumDelay = i * (strumming / 1000);
           updatedEvents = playNote(
             updatedEvents,
@@ -540,6 +556,19 @@ function App({audioApi}) {
           <input hidden type="number" value={strumming} readOnly />
         </label>
         <label>
+          strum mode:{' '}
+          <select
+            value={strumMode}
+            onChange={event => setStrumMode(event.currentTarget.value)}
+          >
+            {['up', 'down', 'random'].map(key => (
+              <option key={key} value={key}>
+                {key}
+              </option>
+            ))}
+          </select>
+        </label>{' '}
+        <label>
           <input
             type="checkbox"
             onChange={toggleExtra}
@@ -585,6 +614,7 @@ function App({audioApi}) {
                         setLastChord: () => {},
                         octave,
                         strumming,
+                        strumMode,
                         selected: false,
                         onMouseOver: setHighlightedChord,
                       }}
@@ -632,6 +662,7 @@ function App({audioApi}) {
                                   setLastChord,
                                   octave,
                                   strumming,
+                                  strumMode,
                                   selected: chordData.chordName === lastChord,
                                   onMouseOver: setHighlightedChord,
                                 }}
