@@ -19,6 +19,7 @@ const styles = {
     height: 70,
     marginTop: 16,
     marginBottom: 20,
+    cursor: 'pointer',
   },
   whiteKey: {
     position: 'absolute',
@@ -60,11 +61,12 @@ function Keyboard(props: {
   startOctave: number,
   octaves: number,
   highlightType: string,
+  notePlayer: Object,
 }) {
   const numKeys = whiteNotes.length * props.octaves;
   const keys = [];
 
-  const {highlightKeys, highlightType} = props;
+  const {highlightKeys, highlightType, notePlayer} = props;
 
   const highlightKeysSharpified = React.useMemo(
     () =>
@@ -80,6 +82,19 @@ function Keyboard(props: {
     [highlightKeys]
   );
 
+  function makeHandlers(noteName) {
+    return {
+      onMouseOver: e => {
+        if (e.buttons > 0) {
+          notePlayer.triggerAttack(noteName);
+        }
+      },
+      onMouseDown: () => notePlayer.triggerAttack(noteName),
+      onMouseUp: () => notePlayer.triggerRelease(noteName),
+      onMouseOut: () => notePlayer.triggerRelease(noteName),
+    };
+  }
+
   range(props.octaves, props.startOctave).forEach((octave, octaveOffset) => {
     whiteNotes.forEach((note, noteOffset) => {
       const noteName = note + octave;
@@ -87,6 +102,7 @@ function Keyboard(props: {
       keys.push(
         <div
           key={noteName}
+          {...makeHandlers(noteName)}
           style={{
             ...styles.whiteKey,
             ...(highlightKeysSharpified &&
@@ -106,6 +122,7 @@ function Keyboard(props: {
         keys.push(
           <div
             key={noteNameSharp}
+            {...makeHandlers(noteNameSharp)}
             style={{
               ...styles.blackKey,
               ...(highlightKeysSharpified &&

@@ -114,7 +114,7 @@ const NOTE_ON = 0x90;
 const NOTE_OFF = 0x80;
 const velocityMidi = 80;
 
-function onTick(events, audioApi, midiOut) {
+function onTick(events, audioApi, onMidi) {
   let i = 0;
   for (; i < events.length; i++) {
     const nextEvent = events[i];
@@ -122,14 +122,7 @@ function onTick(events, audioApi, midiOut) {
       break;
     }
 
-    if (midiOut) {
-      if (!midiOut.send) {
-        debugger;
-      }
-      midiOut.send(nextEvent.message);
-    } else if (audioApi.dx7) {
-      audioApi.dx7.onMidi(nextEvent.message);
-    }
+    onMidi(nextEvent.message);
   }
 
   return i === 0 ? events : events.slice(i);
@@ -448,16 +441,39 @@ function App({audioApi}) {
 
   useValueObserver(scaleData, setHighlightedScale);
 
+  const onMidi = React.useMemo(() => {
+    if (midiOut) {
+      if (!midiOut.send) {
+        debugger;
+      }
+      return message => midiOut.send(message);
+    } else if (audioApi.dx7) {
+      return message => audioApi.dx7.onMidi(message);
+    }
+    return message => {};
+  }, [audioApi, midiOut]);
+
+  const notePlayer = React.useMemo(() => {
+    return {
+      triggerAttack(noteName) {
+        onMidi([NOTE_ON, Tonal.note(noteName).midi, velocityMidi]);
+      },
+      triggerRelease(noteName) {
+        onMidi([NOTE_OFF, Tonal.note(noteName).midi, velocityMidi]);
+      },
+    };
+  }, [onMidi]);
+
   // startup
   React.useEffect(() => {
     // start event-consuming interval
     const id = setInterval(() => {
-      setEvents(events => onTick(events, audioApi, midiOut));
+      setEvents(events => onTick(events, audioApi, onMidi));
     }, 1);
     return () => {
       clearInterval(id);
     };
-  }, [midiOut]);
+  }, [onMidi]);
 
   return (
     <div className="App">
@@ -538,6 +554,7 @@ function App({audioApi}) {
         startOctave={octave}
         octaves={3}
         highlightType={highlightedKeys ? highlightedKeys.type : 'scale'}
+        notePlayer={notePlayer}
       />
 
       {SHOW_HISTORY && (
