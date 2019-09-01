@@ -1,6 +1,4 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
 import {knuthShuffle} from 'knuth-shuffle';
 import * as Tonal from '@tonaljs/tonal';
 import * as Scale from '@tonaljs/scale';
@@ -18,9 +16,6 @@ const SHOW_NOTE_OCTS = true;
 const SHOW_FULL_CHORD_NAMES = false;
 const SIZE_ASC = true;
 const SHOW_HISTORY = true;
-const USE_SAMPLED_DX7 = Boolean(
-  new URL(document.location).searchParams.get('sampled')
-);
 
 const strummingTimes = [0, 10, 30, 50, 75, 100, 150, 200];
 const strummingTimesIndex = {};
@@ -684,98 +679,4 @@ function App({audioApi}) {
   );
 }
 
-function Theme() {
-  const [darkMode, setDarkMode] = React.useState(false);
-
-  React.useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add('dark-mode');
-    } else {
-      document.documentElement.classList.remove('dark-mode');
-    }
-  }, [darkMode]);
-
-  return (
-    <div style={{position: 'absolute', top: 0, right: 0}}>
-      <label>
-        dark mode:{' '}
-        <input
-          type="checkbox"
-          checked={darkMode}
-          onChange={() => setDarkMode(s => !s)}
-        />
-      </label>
-    </div>
-  );
-}
-
-const CAN_AUTOPLAY_AUDIO = new AudioContext().state == 'running';
-
-function Startup() {
-  const [startedAudio, setStartedAudio] = React.useState(false);
-  const [audioApi, setAudioApi] = React.useState(null);
-
-  const onStart = React.useCallback(() => {
-    document.querySelector('.dx7').style.visibility = 'visible';
-    setStartedAudio(true);
-  }, [setStartedAudio]);
-
-  React.useEffect(() => {
-    async function initSampled() {
-      const {sampledDX7} = await import('./sampledDX7');
-
-      sampledDX7().then(({dx7, actx}) => {
-        window.initDX7Shim(dx7, actx);
-      });
-    }
-    window.onDX7Init = (dx7, actx) => {
-      if (!dx7) {
-        // fall back to sampled
-        return initSampled();
-      }
-      const newAudioApi = {
-        dx7,
-        actx,
-      };
-
-      setAudioApi(newAudioApi);
-      if (actx.state === 'running') {
-        onStart();
-      }
-    };
-    if (USE_SAMPLED_DX7) {
-      initSampled();
-    } else {
-      window.initDX7(process.env.PUBLIC_URL);
-    }
-  }, []);
-
-  if (audioApi && startedAudio) {
-    return (
-      <div>
-        <App audioApi={audioApi} />
-        <Theme />
-      </div>
-    );
-  }
-
-  return (
-    <div className="App">
-      {audioApi ? (
-        <button
-          style={{fontSize: 42, borderRadius: 9, cursor: 'pointer'}}
-          onClick={() => {
-            audioApi.actx.resume();
-            onStart();
-          }}
-        >
-          start
-        </button>
-      ) : (
-        'loading'
-      )}
-    </div>
-  );
-}
-
-export default Startup;
+export default App;
