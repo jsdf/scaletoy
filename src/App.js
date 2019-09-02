@@ -7,7 +7,7 @@ import * as Note from '@tonaljs/note';
 import Recorder from './Recorder';
 import useQueryParam, {QUERY_PARAM_FORMATS} from './useQueryParam';
 import useValueObserver from './useValueObserver';
-import MidiOutput from './MidiOutput';
+import MidiDeviceSelector from './MidiDeviceSelector';
 import Keyboard from './Keyboard';
 import MidiExport from './MidiExport';
 
@@ -493,7 +493,11 @@ function App({audioApi}) {
       {audioApi.dx7 && (
         <Recorder actx={audioApi.actx} inputNode={audioApi.dx7} />
       )}
-      <MidiOutput selectedOutput={midiOut} onChangeOutput={setMidiOut} />
+      <MidiDeviceSelector
+        type="output"
+        selectedPort={midiOut}
+        onChange={setMidiOut}
+      />
       <div onMouseOver={setHighlightedScale}>
         <label>
           key:{' '}
