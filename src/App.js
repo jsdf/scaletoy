@@ -539,7 +539,7 @@ function App({audioApi}) {
           </select>
         </label>{' '}
         <label>scale notes: </label>
-        {scaleData.scaleNotes.join()}{' '}
+        {scaleData.scaleNotes.map(note => Note.simplify(note)).join()}{' '}
         <button onClick={playScale}>play scale</button>{' '}
         <label>
           strumming:

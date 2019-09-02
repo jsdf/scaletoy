@@ -72,11 +72,12 @@ function Keyboard(props: {
     () =>
       highlightKeys
         ? highlightKeys.map(noteName => {
-            if (Tonal.note(noteName).acc === 'b') {
-              return Note.enharmonic(noteName);
+            const noteNameSimplified = Note.simplify(noteName);
+            if (Tonal.note(noteNameSimplified).acc === 'b') {
+              return Note.enharmonic(noteNameSimplified);
             }
 
-            return noteName;
+            return noteNameSimplified;
           })
         : null,
     [highlightKeys]
