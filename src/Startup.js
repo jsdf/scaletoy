@@ -1,6 +1,7 @@
 // @flow
 import React from 'react';
 import useQueryParam, {QUERY_PARAM_FORMATS} from './useQueryParam';
+import useLocalStorage from './useLocalStorage';
 import './App.css';
 import App from './App';
 
@@ -16,7 +17,7 @@ function nonnull<T>(v: ?T): T {
 }
 
 function Theme() {
-  const [darkMode, setDarkMode] = React.useState(false);
+  const [darkMode, setDarkMode] = useLocalStorage('darkMode', false);
 
   React.useEffect(() => {
     if (darkMode) {

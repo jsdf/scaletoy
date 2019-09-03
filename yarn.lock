@@ -1207,6 +1207,13 @@
   dependencies:
     "@tonaljs/tonal" "^3.2.1"
 
+"@tonaljs/array@^3.2.2":
+  version "3.2.2"
+  resolved "https://registry.yarnpkg.com/@tonaljs/array/-/array-3.2.2.tgz#a4f29ec1b253e61bb87e7e1e1bf2158c3097b0b8"
+  integrity sha512-X4c3ZJEkXp0jA4uWrVYvJ3aN+uzHamW4noUjakwGqlNx0UBBV0zHCGlCVCbH5WRY1ugYdSVU64wtIAYnlwCLQQ==
+  dependencies:
+    "@tonaljs/tonal" "^3.2.2"
+
 "@tonaljs/chord-dictionary@^3.2.1":
   version "3.2.1"
   resolved "https://registry.yarnpkg.com/@tonaljs/chord-dictionary/-/chord-dictionary-3.2.1.tgz#58fa0fe2973f3f7d926c4bce49e408313ebfb83d"
@@ -1233,6 +1240,13 @@
   dependencies:
     "@tonaljs/tonal" "^3.2.1"
 
+"@tonaljs/interval@^3.2.2":
+  version "3.2.2"
+  resolved "https://registry.yarnpkg.com/@tonaljs/interval/-/interval-3.2.2.tgz#340726ca24936f9fcc70241b8e4c5d2f7243190a"
+  integrity sha512-M2Xah2hS0sBLB9ta8fni16RC7dc/GX7d/zeSGzD7Gh8xtrlajiJBeLT8wcz/JuKSphUzdehJboELwireGdxfBQ==
+  dependencies:
+    "@tonaljs/tonal" "^3.2.2"
+
 "@tonaljs/midi@^3.2.2":
   version "3.2.2"
   resolved "https://registry.yarnpkg.com/@tonaljs/midi/-/midi-3.2.2.tgz#d16380562ff4e60a3d7c13ec9515c5ec4d6ee1db"
@@ -1256,6 +1270,14 @@
     "@tonaljs/array" "^3.2.1"
     "@tonaljs/tonal" "^3.2.1"
 
+"@tonaljs/pcset@^3.2.2":
+  version "3.2.2"
+  resolved "https://registry.yarnpkg.com/@tonaljs/pcset/-/pcset-3.2.2.tgz#05f30ebe74b2489352727708625a41efb873afa7"
+  integrity sha512-YZTuJmI1SJomkF0bv90+K/vGG5nqNzv+0jZ9qCp/OTAA5iCK175YRYl4TB7A0jCRi5IhQwEnu7pba1wWjY5bbw==
+  dependencies:
+    "@tonaljs/array" "^3.2.2"
+    "@tonaljs/tonal" "^3.2.2"
+
 "@tonaljs/scale-dictionary@^3.2.1":
   version "3.2.1"
   resolved "https://registry.yarnpkg.com/@tonaljs/scale-dictionary/-/scale-dictionary-3.2.1.tgz#eaf821ee56e4a89becb43e1aa3724c4901b57f00"
@@ -1263,6 +1285,14 @@
   dependencies:
     "@tonaljs/interval" "^3.2.1"
     "@tonaljs/pcset" "^3.2.1"
+
+"@tonaljs/scale-dictionary@^3.2.2":
+  version "3.2.2"
+  resolved "https://registry.yarnpkg.com/@tonaljs/scale-dictionary/-/scale-dictionary-3.2.2.tgz#1b8bc4fad8998c652b28d384b13f47cd1fc7dd03"
+  integrity sha512-0jNjbe49QcNaN2YUUKqjGZA6HErebHM86xufkxkBOKlcSgGdUsomjQlwSoCbFHPD5Qqw4Mu86b6TzGmYEvhm/A==
+  dependencies:
+    "@tonaljs/interval" "^3.2.2"
+    "@tonaljs/pcset" "^3.2.2"
 
 "@tonaljs/scale@^3.2.1":
   version "3.2.1"
