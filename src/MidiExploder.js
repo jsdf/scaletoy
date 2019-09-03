@@ -280,16 +280,12 @@ function TracksView({midi, selectedNotes, setSelectedNotes}) {
 
 function SelectionInfo({scaleData, selectedNotes, notePlayer}) {
   const selectedNotesSet = [
-    ...new Set([...selectedNotes].map(note => note.name)),
+    ...new Set([...selectedNotes].map(note => Tonal.note(note.name).pc)),
   ];
 
-  const selectedNotesAbstractMidi = selectedNotesSet
-    .map(noteName => Tonal.note(`${Tonal.note(noteName).pc}0`).midi)
-    .sort();
-
   const matchingScales = scaleData.keyScales.filter(scale => {
-    for (const noteMidi of selectedNotesAbstractMidi) {
-      if (!scale.notesAbstractMidi.has(noteMidi)) {
+    for (const noteName of selectedNotesSet) {
+      if (!scale.notes.includes(noteName)) {
         return false;
       }
       return true;
