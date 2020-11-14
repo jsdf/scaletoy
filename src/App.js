@@ -9,7 +9,13 @@ import useQueryParam, {QUERY_PARAM_FORMATS} from './useQueryParam';
 import useValueObserver from './useValueObserver';
 import MidiDeviceSelector from './MidiDeviceSelector';
 import Keyboard from './Keyboard';
+import Scaleboard from './Scaleboard';
 import MidiExport from './MidiExport';
+import simplifyEnharmonics from './simplifyEnharmonics';
+import Details from './Details';
+import Select from './Select';
+import Range from './Range';
+import Checkbox from './Checkbox';
 
 const SHOW_NOTE_NAMES = true;
 const SHOW_NOTE_OCTS = true;
@@ -29,9 +35,9 @@ function transposeByOctaves(note, shift) {
 
 function getChordsBySize(chords, key) {
   return chords
-    .map(chordType => Chord.chord(`${key}${chordType}`))
+    .map((chordType) => Chord.chord(`${key}${chordType}`))
     .sort((a, b) => a.intervals.length - b.intervals.length)
-    .map(chord => `${chord.tonic}${chord.aliases[0]}`);
+    .map((chord) => `${chord.tonic}${chord.aliases[0]}`);
 }
 
 const keys = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B'];
@@ -129,7 +135,7 @@ function playNote(events, noteName, start, end) {
 
   let updatedEvents = events;
   // end any upcoming events for this key
-  events.forEach(ev => {
+  events.forEach((ev) => {
     if (ev.message[1] == noteMidi) {
       ev.time = start - 0.01;
       ev.message[0] = NOTE_OFF;
@@ -166,7 +172,7 @@ function makeOctaveScaleNoteSequence(key, octave, scaleType) {
 function getReifiedNotesForChord(chordName, octave) {
   const chordData = Chord.chord(chordName);
   const tonicReified = chordData.tonic + octave;
-  const notes = chordData.intervals.map(interval =>
+  const notes = chordData.intervals.map((interval) =>
     Tonal.transpose(tonicReified, interval)
   );
   return notes;
@@ -177,14 +183,14 @@ function getReifiedNotesForChord(chordName, octave) {
 function getReifiedNotesForChordForScale(chordName, scalePitchClassesNotesMap) {
   const chordData = Chord.chord(chordName);
   const tonicReified = scalePitchClassesNotesMap[chordData.tonic];
-  const notes = chordData.intervals.map(interval =>
+  const notes = chordData.intervals.map((interval) =>
     Note.simplify(Tonal.transpose(tonicReified, interval))
   );
   return notes;
 }
 
 function reifyScaleNotesWithOctave(scale, octave) {
-  return scale.intervals.map(interval =>
+  return scale.intervals.map((interval) =>
     Tonal.transpose(`${scale.tonic}${octave}`, interval)
   );
 }
@@ -195,7 +201,7 @@ function makeScaleData(key, scaleType, octave) {
 
   const scaleNotes = reifyScaleNotesWithOctave(scale, octave);
   const scalePitchClassesNotesMap = {};
-  scaleNotes.forEach(noteName => {
+  scaleNotes.forEach((noteName) => {
     scalePitchClassesNotesMap[Tonal.note(noteName).pc] = noteName;
   });
 
@@ -204,7 +210,7 @@ function makeScaleData(key, scaleType, octave) {
       return [
         pos,
 
-        chordNames.map(chordName => {
+        chordNames.map((chordName) => {
           const chord = Chord.chord(chordName);
           return {
             pos,
@@ -224,7 +230,7 @@ function makeScaleData(key, scaleType, octave) {
   );
 
   const chordDatasByName = new Map(
-    Array.from(scalePosChords.values).map(chordData => [
+    Array.from(scalePosChords.values).map((chordData) => [
       chordData.chordName,
       chordData,
     ])
@@ -233,7 +239,7 @@ function makeScaleData(key, scaleType, octave) {
   const sizes = new Set();
 
   scalePosChords.forEach((chordDatas, pos) => {
-    chordDatas.forEach(chordData => {
+    chordDatas.forEach((chordData) => {
       sizes.add(chordData.size);
     });
   });
@@ -273,6 +279,10 @@ const flexColContainer = {
 const flexCol = {
   flex: 1,
 };
+const alignLeft = {
+  textAlign: 'left',
+};
+const alignCenter = {textAlign: 'center'};
 
 const ChordButton = React.memo(
   ({
@@ -283,8 +293,35 @@ const ChordButton = React.memo(
     strumming,
     strumMode,
     selected,
+    showScaleDegrees,
     onMouseOver,
   }) => {
+    let noteNames = null;
+
+    if (SHOW_NOTE_NAMES) {
+      if (showScaleDegrees) {
+        noteNames = (
+          <div>
+            <small>
+              {chordData.chord.intervals
+                // .map((v) => v.replace(/\D*/g, ''))
+                .join()}
+            </small>
+          </div>
+        );
+      } else {
+        noteNames = (
+          <div>
+            <small>
+              {SHOW_NOTE_OCTS
+                ? chordData.chordNotesForOctave.join()
+                : chordData.chord.notes.join()}
+            </small>
+          </div>
+        );
+      }
+    }
+
     return (
       <div
         style={{
@@ -293,12 +330,16 @@ const ChordButton = React.memo(
           border: '1px solid',
           borderColor: selected ? 'rgba(0,0,0,0.2)' : 'transparent',
         }}
-        onClick={() => {
+        onMouseDown={() => {
           playChord(chordData, octave, strumming, strumMode);
           setLastChord(chordData.chordName);
           console.log(chordData);
         }}
-        onMouseOver={() => {
+        onMouseEnter={(e) => {
+          if (e.buttons > 0) {
+            playChord(chordData, octave, strumming, strumMode);
+            setLastChord(chordData.chordName);
+          }
           onMouseOver(chordData.chordNotesForOctave);
         }}
       >
@@ -316,17 +357,7 @@ const ChordButton = React.memo(
               </small>
             </div>
           )}
-          {true && (
-            <div>
-              {SHOW_NOTE_NAMES && SHOW_NOTE_OCTS && (
-                <small>{chordData.chordNotesForOctave.join()}</small>
-              )}
-
-              {SHOW_NOTE_NAMES && !SHOW_NOTE_OCTS && (
-                <small>{chordData.chord.notes.join()}</small>
-              )}
-            </div>
-          )}
+          {noteNames}
         </div>
       </div>
     );
@@ -370,10 +401,22 @@ function App({audioApi}) {
     'major',
     QUERY_PARAM_FORMATS.string
   );
+  const [showScaleDegrees, setShowScaleDegrees] = useQueryParam(
+    'showScaleDegrees',
+    true,
+    QUERY_PARAM_FORMATS.boolean
+  );
+
+  const [scaleSteps, setScaleSteps] = useQueryParam(
+    'scaleSteps',
+    7,
+    QUERY_PARAM_FORMATS.integer
+  );
 
   const [highlightedKeys, setHighlightedKeys] = React.useState(null);
-  const setHighlightedChord = React.useCallback(keys =>
-    setHighlightedKeys({keys, type: 'chord'})
+  const setHighlightedChord = React.useCallback(
+    (keys) => setHighlightedKeys({keys, type: 'chord'}),
+    [setHighlightedKeys]
   );
 
   const [history, setHistory] = React.useState([]);
@@ -388,19 +431,17 @@ function App({audioApi}) {
     setHighlightedKeys({keys: scaleData.scaleNotes, type: 'scale'});
   }, [scaleData]);
 
-  const toggleExtra = React.useCallback(() => setIncludeExtra(s => !s));
-
   const [events, setEvents] = React.useState([]);
   const [midiOut, setMidiOut] = React.useState(null);
 
   const playScale = React.useCallback(() => {
-    setEvents(events => {
+    setEvents((events) => {
       let updatedEvents = events;
       const scaleNotes = scaleData.scaleNotes.slice();
       scaleNotes.push(Tonal.transpose(scaleNotes[0], '8P'));
       const currentTime = audioApi.actx.currentTime;
       let lastStartTimeOffset = 0;
-      scaleNotes.forEach(noteName => {
+      scaleNotes.forEach((noteName) => {
         lastStartTimeOffset += beatDurationSeconds;
 
         updatedEvents = playNote(
@@ -419,7 +460,7 @@ function App({audioApi}) {
     (chordData, octave, strumming, strumMode) => {
       const chordNotes = chordData.chordNotesForOctave;
 
-      setEvents(events => {
+      setEvents((events) => {
         let updatedEvents = events;
 
         const currentTime = audioApi.actx.currentTime;
@@ -445,7 +486,7 @@ function App({audioApi}) {
         return updatedEvents;
       });
 
-      setHistory(s => s.concat(chordData));
+      setHistory((s) => s.concat(chordData));
     },
     [setEvents, audioApi]
   );
@@ -457,11 +498,11 @@ function App({audioApi}) {
       if (!midiOut.send) {
         debugger;
       }
-      return message => midiOut.send(message);
+      return (message) => midiOut.send(message);
     } else if (audioApi.dx7) {
-      return message => audioApi.dx7.onMidi(message);
+      return (message) => audioApi.dx7.onMidi(message);
     }
-    return message => {};
+    return (message) => {};
   }, [audioApi, midiOut]);
 
   const notePlayer = React.useMemo(() => {
@@ -479,7 +520,7 @@ function App({audioApi}) {
   React.useEffect(() => {
     // start event-consuming interval
     const id = setInterval(() => {
-      setEvents(events => onTick(events, audioApi, onMidi));
+      setEvents((events) => onTick(events, audioApi, onMidi));
     }, 1);
     return () => {
       clearInterval(id);
@@ -487,108 +528,106 @@ function App({audioApi}) {
   }, [onMidi]);
 
   return (
-    <div className="App">
-      <button onClick={suspendAudio}>pause audio</button>
-      <button onClick={resumeAudio}>resume audio</button>
-      {audioApi.dx7 && (
-        <Recorder actx={audioApi.actx} inputNode={audioApi.dx7} />
-      )}
-      <MidiDeviceSelector
-        type="output"
-        selectedPort={midiOut}
-        onChange={setMidiOut}
-      />
-      <div onMouseOver={setHighlightedScale}>
-        <label>
-          key:{' '}
-          <select
+    <div className="App" style={alignLeft}>
+      <div /*controls*/>
+        <button onClick={suspendAudio}>pause audio</button>
+        <button onClick={resumeAudio}>resume audio</button>
+        {audioApi.dx7 && (
+          <Recorder actx={audioApi.actx} inputNode={audioApi.dx7} />
+        )}
+        <MidiDeviceSelector
+          type="output"
+          selectedPort={midiOut}
+          onChange={setMidiOut}
+        />
+        <div onMouseOver={setHighlightedScale}>
+          <Select
+            label="key"
+            options={keys}
             value={scaleData.key}
-            onChange={event => setKey(event.currentTarget.value)}
-          >
-            {keys.map(key => (
-              <option key={key} value={key}>
-                {key}
-              </option>
-            ))}
-          </select>
-        </label>{' '}
-        <label>
-          octave:{' '}
-          <select
+            onChange={setKey}
+          />{' '}
+          <Select
+            label="octave"
+            options={[1, 2, 3, 4, 5, 6, 7]}
             value={octave}
-            onChange={event => setOctave(parseInt(event.currentTarget.value))}
-          >
-            {[1, 2, 3, 4, 5, 6, 7].map(key => (
-              <option key={key} value={key}>
-                {key}
-              </option>
-            ))}
-          </select>
-        </label>{' '}
-        <label>
-          scale type:{' '}
-          <select
+            onChange={setOctave}
+          />{' '}
+          <Select
+            label="scale type"
+            options={allScales}
             value={scaleType}
-            onChange={event => setScaleType(event.currentTarget.value)}
-          >
-            {allScales.map(key => (
-              <option key={key} value={key}>
-                {key}
-              </option>
-            ))}
-          </select>
-        </label>{' '}
-        <label>scale notes: </label>
-        {scaleData.scaleNotes.map(note => Note.simplify(note)).join()}{' '}
-        <button onClick={playScale}>play scale</button>{' '}
-        <label>
-          strumming:
-          <input
-            type="range"
+            onChange={setScaleType}
+          />{' '}
+          <label>scale notes: </label>
+          {scaleData.scaleNotes.map((note) => Note.simplify(note)).join()}{' '}
+          <button onClick={playScale}>play scale</button>{' '}
+          <Range
+            label="strumming"
             min={0}
             max={strummingTimes.length - 1}
             value={strummingTimesIndex[strumming]}
-            onChange={e => {
-              setStrumming(strummingTimes[parseInt(e.currentTarget.value)]);
+            onChange={(value) => {
+              setStrumming(strummingTimes[value]);
             }}
-          />{' '}
-          <input hidden type="number" value={strumming} readOnly />
-        </label>
-        <label>
-          strum mode:{' '}
-          <select
-            value={strumMode}
-            onChange={event => setStrumMode(event.currentTarget.value)}
-          >
-            {['up', 'down', 'random'].map(key => (
-              <option key={key} value={key}>
-                {key}
-              </option>
-            ))}
-          </select>
-        </label>{' '}
-        <label>
-          <input
-            type="checkbox"
-            onChange={toggleExtra}
-            checked={includeExtra}
           />
-          include extra chords
-        </label>
+          <Select
+            label="strum mode"
+            options={['up', 'down', 'random']}
+            value={strumMode}
+            onChange={setStrumMode}
+          />{' '}
+          <Select
+            label="scale steps"
+            options={[1, 2, 3, 4, 5, 6, 7]}
+            value={scaleSteps}
+            onChange={setScaleSteps}
+          />
+          <div>
+            <Checkbox
+              label="include extra chords"
+              onChange={setIncludeExtra}
+              checked={includeExtra}
+            />
+            <Checkbox
+              label="show scale degrees"
+              onChange={setShowScaleDegrees}
+              checked={showScaleDegrees}
+            />
+          </div>
+        </div>
       </div>
-
-      <Keyboard
-        highlightKeys={highlightedKeys ? highlightedKeys.keys : null}
-        startOctave={octave}
-        octaves={3}
-        highlightType={highlightedKeys ? highlightedKeys.type : 'scale'}
-        notePlayer={notePlayer}
-      />
-
+      <div style={alignLeft}>
+        <Details summary="keyboard" startOpen={true}>
+          <Keyboard
+            highlightKeys={highlightedKeys ? highlightedKeys.keys : null}
+            startOctave={Math.max(0, octave - 1)}
+            octaves={5}
+            highlightType={highlightedKeys ? highlightedKeys.type : 'scale'}
+            notePlayer={notePlayer}
+          />
+        </Details>
+        <Details summary="scale keyboard" startOpen={true}>
+          <Scaleboard
+            scalePitchClasses={scaleData.scalePitchClasses}
+            highlightKeys={
+              highlightedKeys && highlightedKeys.type !== 'scale'
+                ? highlightedKeys.keys
+                : null
+            }
+            startOctave={Math.max(0, octave - 1)}
+            octaves={5}
+            highlightType={highlightedKeys ? highlightedKeys.type : 'scale'}
+            notePlayer={notePlayer}
+            showScaleDegrees={showScaleDegrees}
+            scaleSteps={scaleSteps}
+          />
+        </Details>
+      </div>
       {SHOW_HISTORY && (
-        <div style={{textAlign: 'left'}}>
+        <div style={alignLeft}>
           <details>
-            <summary style={{textAlign: 'left'}}>
+            <summary style={alignLeft}>
               <div style={{display: 'initial'}}>history/export</div>
             </summary>
             <div style={{padding: '8px 0'}}>
@@ -614,6 +653,7 @@ function App({audioApi}) {
                         octave,
                         strumming,
                         strumMode,
+                        showScaleDegrees,
                         selected: false,
                         onMouseOver: setHighlightedChord,
                       }}
@@ -628,57 +668,63 @@ function App({audioApi}) {
         </div>
       )}
 
-      <div style={flexColContainer}>
-        <div style={flexCol}>
-          {scaleData.sizes
-            .filter(size => (includeExtra ? true : size > 0))
-            .sort((a, b) => (SIZE_ASC ? a - b : b - a))
-            .map((size, sizeIndex) => (
-              <div key={sizeIndex}>
-                {false && <div style={{flex: 1}}>{size}</div>}
-                <br />
-                <div key={size} style={{display: 'flex'}}>
-                  {Array.from(scaleData.scalePosChords).map(
-                    ([pos, chordDatas]) => {
-                      return (
-                        <div key={pos} style={{flex: 1}}>
-                          {sizeIndex === 0 && (
-                            <div>{scaleTypesPosNames[scaleType][pos]}</div>
-                          )}
+      <Details summary="chord palette" startOpen={true}>
+        <div style={{...flexColContainer, ...alignCenter}}>
+          <div style={flexCol}>
+            {scaleData.sizes
+              .filter((size) => (includeExtra ? true : size > 0))
+              .sort((a, b) => (SIZE_ASC ? a - b : b - a))
+              .map((size, sizeIndex) => (
+                <div key={sizeIndex}>
+                  {false && <div style={{flex: 1}}>{size}</div>}
+                  <br />
+                  <div key={size} style={{display: 'flex'}}>
+                    {Array.from(scaleData.scalePosChords).map(
+                      ([pos, chordDatas]) => {
+                        return (
+                          <div key={pos} style={{flex: 1}}>
+                            {sizeIndex === 0 && (
+                              <div>{scaleTypesPosNames[scaleType][pos]}</div>
+                            )}
 
-                          {chordDatas
-                            .filter(chordData => chordData.size === size)
-                            // silly heuristic for simpler chords
-                            .sort(
-                              (a, b) => a.chordName.length - b.chordName.length
-                            )
-                            .map((chordData, i) => (
-                              <ChordButton
-                                key={i}
-                                {...{
-                                  chordData,
-                                  playChord,
-                                  setLastChord,
-                                  octave,
-                                  strumming,
-                                  strumMode,
-                                  selected: chordData.chordName === lastChord,
-                                  onMouseOver: setHighlightedChord,
-                                }}
-                              />
-                            ))}
-                        </div>
-                      );
-                    }
-                  )}
+                            {chordDatas
+                              .filter((chordData) => chordData.size === size)
+                              // silly heuristic for simpler chords
+                              .sort(
+                                (a, b) =>
+                                  a.chordName.length - b.chordName.length
+                              )
+                              .map((chordData, i) => (
+                                <ChordButton
+                                  key={i}
+                                  {...{
+                                    chordData,
+                                    playChord,
+                                    setLastChord,
+                                    octave,
+                                    strumming,
+                                    strumMode,
+                                    showScaleDegrees,
+                                    selected: chordData.chordName === lastChord,
+                                    onMouseOver: setHighlightedChord,
+                                  }}
+                                />
+                              ))}
+                          </div>
+                        );
+                      }
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+          </div>
         </div>
-      </div>
-      <pre style={{height: 300, overflow: 'auto'}}>
-        {events.map(ev => JSON.stringify(ev)).join('\n')}
-      </pre>
+      </Details>
+      <Details summary="midi events">
+        <pre style={{height: 300, overflow: 'auto'}}>
+          {events.map((ev) => JSON.stringify(ev)).join('\n')}
+        </pre>
+      </Details>
     </div>
   );
 }

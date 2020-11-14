@@ -1,12 +1,12 @@
 import React from 'react';
 import simplifyEnharmonics from './simplifyEnharmonics';
 
+// tonic, dominant, submediant, mediant, supertonic, leading tone, subdominant
+const scaleDegreeImportance = [1, 5, 6, 3, 2, 7];
+
 function range(size, startAt = 0) {
   return [...Array(size).keys()].map((i) => i + startAt);
 }
-
-const whiteNotes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
-const notesWithSharps = new Set(['C', 'D', 'F', 'G', 'A']);
 
 const styles = {
   container: {
@@ -30,23 +30,16 @@ const styles = {
     border: 'solid 1px black',
     zIndex: 0,
   },
+  tonicKey: {
+    background: '#ccc',
+  },
   noteLabel: {
     width: 20,
     marginTop: 70,
+    fontSize: 10,
   },
   highlighted: {
     background: 'orange',
-  },
-  blackKey: {
-    position: 'absolute',
-    borderBottomLeftRadius: 3,
-    borderBottomRightRadius: 3,
-    width: 9,
-    height: 50,
-    background: 'black',
-    border: 'solid 1px black',
-
-    zIndex: 1,
   },
 };
 
@@ -55,14 +48,21 @@ const highlightTypeColors = {
   chord: 'orange',
 };
 
-function Keyboard(props: {
+function atStartOfOctave(note) {
+  return note[0] > 'B';
+}
+
+function Scaleboard(props: {
   highlightKeys: Array<string>;
   startOctave: number;
   octaves: number;
   highlightType: string;
   notePlayer: Object;
+  scalePitchClasses: Array<string>;
+  showScaleDegrees: boolean;
+  scaleSteps: number;
 }) {
-  const numKeys = whiteNotes.length * props.octaves;
+  const numKeys = props.scaleSteps * props.octaves;
   const keys = [];
 
   const {highlightKeys, highlightType, notePlayer} = props;
@@ -85,49 +85,56 @@ function Keyboard(props: {
     };
   }
 
-  range(props.octaves, props.startOctave).forEach((octave, octaveOffset) => {
-    whiteNotes.forEach((note, noteOffset) => {
-      const noteName = note + octave;
-      const noteNameSharp = note + '#' + octave;
-      keys.push(
-        <div
-          key={noteName}
-          {...makeHandlers(noteName)}
-          style={{
-            ...styles.whiteKey,
-            ...(highlightKeysSharpified &&
-            highlightKeysSharpified.includes(noteName)
-              ? {background: highlightTypeColors[highlightType]}
-              : null),
-            left:
-              (octaveOffset * whiteNotes.length + noteOffset) *
-              (styles.whiteKey.width - 1),
-          }}
-        >
-          <div style={styles.noteLabel}>{noteName}</div>
-        </div>
-      );
+  const simplifiedPitchClasses = props.scalePitchClasses.map(
+    simplifyEnharmonics
+  );
+  const importance = scaleDegreeImportance.slice(0, props.scaleSteps);
 
-      if (notesWithSharps.has(note)) {
+  const simplifiedPitchClassesForImportance = importance.map(
+    (i) => simplifiedPitchClasses[i - 1]
+  );
+
+  const notesScaleDegrees = new Map(
+    scaleDegreeImportance.map((scaleDegree) => [
+      simplifiedPitchClasses[scaleDegree - 1],
+      scaleDegree,
+    ])
+  );
+  range(props.octaves, props.startOctave).forEach((octave, octaveOffset) => {
+    simplifiedPitchClassesForImportance
+      .slice()
+      .sort((a, b) => {
+        if (atStartOfOctave(a) === atStartOfOctave(b)) {
+          return a < b ? -1 : 1;
+        }
+
+        return atStartOfOctave(a) ? -1 : 1;
+      })
+      .forEach((note, noteOffset) => {
+        const noteName = note + octave;
         keys.push(
           <div
-            key={noteNameSharp}
-            {...makeHandlers(noteNameSharp)}
+            key={noteName}
+            {...makeHandlers(noteName)}
             style={{
-              ...styles.blackKey,
+              ...styles.whiteKey,
+              ...(note === props.scalePitchClasses[0] ? styles.tonicKey : null),
               ...(highlightKeysSharpified &&
-              highlightKeysSharpified.includes(noteNameSharp)
+              highlightKeysSharpified.includes(noteName)
                 ? {background: highlightTypeColors[highlightType]}
                 : null),
               left:
-                (octaveOffset * whiteNotes.length + noteOffset + 1) *
-                  (styles.whiteKey.width - 1) -
-                (styles.blackKey.width - 1) / 2,
+                (octaveOffset * simplifiedPitchClassesForImportance.length +
+                  noteOffset) *
+                (styles.whiteKey.width - 1),
             }}
-          />
+          >
+            <div style={styles.noteLabel}>
+              {props.showScaleDegrees ? notesScaleDegrees.get(note) : noteName}
+            </div>
+          </div>
         );
-      }
-    });
+      });
   });
   return (
     <div style={styles.container}>
@@ -138,4 +145,4 @@ function Keyboard(props: {
   );
 }
 
-export default React.memo(Keyboard);
+export default React.memo(Scaleboard);
