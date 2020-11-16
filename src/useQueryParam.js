@@ -2,16 +2,23 @@ import {useState} from 'react';
 
 export const QUERY_PARAM_FORMATS = {
   boolean: {
-    parse: v => !(v == null || v === 'false'),
-    stringify: v => JSON.stringify(v),
+    parse: (v) => !(v == null || v === 'false'),
+    stringify: (v) => JSON.stringify(v),
   },
   integer: {
-    parse: v => parseInt(v, 10),
-    stringify: v => JSON.stringify(v),
+    parse: (v) => {
+      const parsed = parseInt(v, 10);
+      if (Number.isNaN(parsed)) {
+        debugger;
+        throw new Error('invalid int when parsing: ' + v);
+      }
+      return parsed;
+    },
+    stringify: (v) => v.toString(),
   },
   string: {
-    parse: v => v,
-    stringify: v => v,
+    parse: (v) => v,
+    stringify: (v) => v,
   },
 };
 
@@ -33,7 +40,7 @@ export default function useQueryParam(param, initialValue, format) {
 
   // Return a wrapped version of useState's setter function that ...
   // ... persists the new value to query params.
-  const setValue = value => {
+  const setValue = (value) => {
     try {
       // Allow value to be a function so we have same API as useState
       const valueToStore =

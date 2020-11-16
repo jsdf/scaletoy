@@ -11,7 +11,7 @@ function initDX7(publicUrl) {
     'eno.syx',
   ];
 
-  const errHandler = e => {
+  const errHandler = (e) => {
     console.error(e);
     debugger;
   };
@@ -72,7 +72,7 @@ function initShimGUI(instrument) {
 }
 
 function initDX7Shim(dx7, actx) {
-  initShimGUI(dx7);
+  // initShimGUI(dx7);
   initMidi(dx7);
   onDX7Init(dx7, actx);
 }

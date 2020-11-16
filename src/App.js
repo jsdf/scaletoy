@@ -16,10 +16,8 @@ import Details from './Details';
 import Select from './Select';
 import Range from './Range';
 import Checkbox from './Checkbox';
+import ChordButton from './ChordButton';
 
-const SHOW_NOTE_NAMES = true;
-const SHOW_NOTE_OCTS = true;
-const SHOW_FULL_CHORD_NAMES = false;
 const SIZE_ASC = true;
 const SHOW_HISTORY = true;
 
@@ -255,24 +253,6 @@ function makeScaleData(key, scaleType, octave) {
   };
 }
 
-const chordTypeColors = {
-  major: 'rgb(127,199,175)',
-  minor: 'rgb(255,158,157)',
-  diminished: 'rgb(218,216,167)',
-};
-
-const buttonStyle = {
-  display: 'block',
-  width: '100%',
-  cursor: 'pointer',
-  color: 'black',
-  padding: 4,
-  paddingBottom: 8,
-  height: 46,
-  overflow: 'hidden',
-  textAlign: 'center',
-};
-
 const flexColContainer = {
   display: 'flex',
 };
@@ -283,86 +263,6 @@ const alignLeft = {
   textAlign: 'left',
 };
 const alignCenter = {textAlign: 'center'};
-
-const ChordButton = React.memo(
-  ({
-    chordData,
-    playChord,
-    setLastChord,
-    octave,
-    strumming,
-    strumMode,
-    selected,
-    showScaleDegrees,
-    onMouseOver,
-  }) => {
-    let noteNames = null;
-
-    if (SHOW_NOTE_NAMES) {
-      if (showScaleDegrees) {
-        noteNames = (
-          <div>
-            <small>
-              {chordData.chord.intervals
-                // .map((v) => v.replace(/\D*/g, ''))
-                .join()}
-            </small>
-          </div>
-        );
-      } else {
-        noteNames = (
-          <div>
-            <small>
-              {SHOW_NOTE_OCTS
-                ? chordData.chordNotesForOctave.join()
-                : chordData.chord.notes.join()}
-            </small>
-          </div>
-        );
-      }
-    }
-
-    return (
-      <div
-        style={{
-          ...buttonStyle,
-          background: chordTypeColors[chordData.chordType],
-          border: '1px solid',
-          borderColor: selected ? 'rgba(0,0,0,0.2)' : 'transparent',
-        }}
-        onMouseDown={() => {
-          playChord(chordData, octave, strumming, strumMode);
-          setLastChord(chordData.chordName);
-          console.log(chordData);
-        }}
-        onMouseEnter={(e) => {
-          if (e.buttons > 0) {
-            playChord(chordData, octave, strumming, strumMode);
-            setLastChord(chordData.chordName);
-          }
-          onMouseOver(chordData.chordNotesForOctave);
-        }}
-      >
-        <div>
-          {chordData.chordName}
-          {SHOW_FULL_CHORD_NAMES && (
-            <div>
-              <small>
-                {chordData.chord.name.length > 3 ? (
-                  chordData.chord.name
-                ) : (
-                  // bad data, don't show
-                  <span>&nbsp;</span>
-                )}
-              </small>
-            </div>
-          )}
-          {noteNames}
-        </div>
-      </div>
-    );
-  }
-);
 
 function App({audioApi}) {
   const resumeAudio = React.useCallback(() => audioApi.actx.resume(), [
@@ -562,68 +462,45 @@ function App({audioApi}) {
           <label>scale notes: </label>
           {scaleData.scaleNotes.map((note) => Note.simplify(note)).join()}{' '}
           <button onClick={playScale}>play scale</button>{' '}
-          <Range
-            label="strumming"
-            min={0}
-            max={strummingTimes.length - 1}
-            value={strummingTimesIndex[strumming]}
-            onChange={(value) => {
-              setStrumming(strummingTimes[value]);
-            }}
+          <Checkbox
+            label="show notes as scale degrees"
+            onChange={setShowScaleDegrees}
+            checked={showScaleDegrees}
           />
-          <Select
-            label="strum mode"
-            options={['up', 'down', 'random']}
-            value={strumMode}
-            onChange={setStrumMode}
-          />{' '}
-          <Select
-            label="scale steps"
-            options={[1, 2, 3, 4, 5, 6, 7]}
-            value={scaleSteps}
-            onChange={setScaleSteps}
-          />
-          <div>
-            <Checkbox
-              label="include extra chords"
-              onChange={setIncludeExtra}
-              checked={includeExtra}
-            />
-            <Checkbox
-              label="show scale degrees"
-              onChange={setShowScaleDegrees}
-              checked={showScaleDegrees}
-            />
-          </div>
         </div>
       </div>
-      <div style={alignLeft}>
-        <Details summary="keyboard" startOpen={true}>
-          <Keyboard
-            highlightKeys={highlightedKeys ? highlightedKeys.keys : null}
-            startOctave={Math.max(0, octave - 1)}
-            octaves={5}
-            highlightType={highlightedKeys ? highlightedKeys.type : 'scale'}
-            notePlayer={notePlayer}
-          />
-        </Details>
-        <Details summary="scale keyboard" startOpen={true}>
-          <Scaleboard
-            scalePitchClasses={scaleData.scalePitchClasses}
-            highlightKeys={
-              highlightedKeys && highlightedKeys.type !== 'scale'
-                ? highlightedKeys.keys
-                : null
-            }
-            startOctave={Math.max(0, octave - 1)}
-            octaves={5}
-            highlightType={highlightedKeys ? highlightedKeys.type : 'scale'}
-            notePlayer={notePlayer}
-            showScaleDegrees={showScaleDegrees}
-            scaleSteps={scaleSteps}
-          />
-        </Details>
-      </div>
+      <Details summary="scale keyboard" startOpen={true}>
+        <Select
+          label="scale steps"
+          options={[1, 2, 3, 4, 5, 6, 7]}
+          value={scaleSteps}
+          onChange={setScaleSteps}
+        />
+        <Scaleboard
+          scalePitchClasses={scaleData.scalePitchClasses}
+          highlightKeys={
+            highlightedKeys && highlightedKeys.type !== 'scale'
+              ? highlightedKeys.keys
+              : null
+          }
+          setOctave={setOctave}
+          startOctave={Math.max(0, octave - 1)}
+          octaves={5}
+          highlightType={highlightedKeys ? highlightedKeys.type : 'scale'}
+          notePlayer={notePlayer}
+          showScaleDegrees={showScaleDegrees}
+          scaleSteps={scaleSteps}
+        />
+      </Details>
+      <Details summary="keyboard" startOpen={true}>
+        <Keyboard
+          highlightKeys={highlightedKeys ? highlightedKeys.keys : null}
+          startOctave={Math.max(0, octave - 1)}
+          octaves={5}
+          highlightType={highlightedKeys ? highlightedKeys.type : 'scale'}
+          notePlayer={notePlayer}
+        />
+      </Details>
       {SHOW_HISTORY && (
         <div style={alignLeft}>
           <details>
@@ -669,6 +546,26 @@ function App({audioApi}) {
       )}
 
       <Details summary="chord palette" startOpen={true}>
+        <Range
+          label="strumming"
+          min={0}
+          max={strummingTimes.length - 1}
+          value={strummingTimesIndex[strumming]}
+          onChange={(value) => {
+            setStrumming(strummingTimes[value]);
+          }}
+        />
+        <Select
+          label="strum mode"
+          options={['up', 'down', 'random']}
+          value={strumMode}
+          onChange={setStrumMode}
+        />{' '}
+        <Checkbox
+          label="include extra chords"
+          onChange={setIncludeExtra}
+          checked={includeExtra}
+        />
         <div style={{...flexColContainer, ...alignCenter}}>
           <div style={flexCol}>
             {scaleData.sizes

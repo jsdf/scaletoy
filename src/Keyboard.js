@@ -1,5 +1,7 @@
 import React from 'react';
 import simplifyEnharmonics from './simplifyEnharmonics';
+import useKeyboardInteractions from './useKeyboardInteractions';
+import styles from './keyboardStyles';
 
 function range(size, startAt = 0) {
   return [...Array(size).keys()].map((i) => i + startAt);
@@ -7,48 +9,6 @@ function range(size, startAt = 0) {
 
 const whiteNotes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
 const notesWithSharps = new Set(['C', 'D', 'F', 'G', 'A']);
-
-const styles = {
-  container: {
-    textAlign: 'center',
-  },
-  keyboard: {
-    display: 'inline-block',
-    position: 'relative',
-    height: 70,
-    marginTop: 16,
-    marginBottom: 20,
-    cursor: 'pointer',
-  },
-  whiteKey: {
-    position: 'absolute',
-    borderBottomLeftRadius: 4,
-    borderBottomRightRadius: 4,
-    width: 20,
-    height: 70,
-    background: 'white',
-    border: 'solid 1px black',
-    zIndex: 0,
-  },
-  noteLabel: {
-    width: 20,
-    marginTop: 70,
-  },
-  highlighted: {
-    background: 'orange',
-  },
-  blackKey: {
-    position: 'absolute',
-    borderBottomLeftRadius: 3,
-    borderBottomRightRadius: 3,
-    width: 9,
-    height: 50,
-    background: 'black',
-    border: 'solid 1px black',
-
-    zIndex: 1,
-  },
-};
 
 const highlightTypeColors = {
   scale: '#4287f5',
@@ -72,18 +32,7 @@ function Keyboard(props: {
     [highlightKeys]
   );
 
-  function makeHandlers(noteName) {
-    return {
-      onMouseOver: (e) => {
-        if (e.buttons > 0) {
-          notePlayer.triggerAttack(noteName);
-        }
-      },
-      onMouseDown: () => notePlayer.triggerAttack(noteName),
-      onMouseUp: () => notePlayer.triggerRelease(noteName),
-      onMouseOut: () => notePlayer.triggerRelease(noteName),
-    };
-  }
+  const {pressedKeys, makeHandlers} = useKeyboardInteractions({notePlayer});
 
   range(props.octaves, props.startOctave).forEach((octave, octaveOffset) => {
     whiteNotes.forEach((note, noteOffset) => {
@@ -99,12 +48,13 @@ function Keyboard(props: {
             highlightKeysSharpified.includes(noteName)
               ? {background: highlightTypeColors[highlightType]}
               : null),
+            ...(pressedKeys.has(noteName) ? styles.pressed : null),
             left:
               (octaveOffset * whiteNotes.length + noteOffset) *
               (styles.whiteKey.width - 1),
           }}
         >
-          <div style={styles.noteLabel}>{noteName}</div>
+          <div style={styles.noteLabel}>{note === 'C' ? noteName : note}</div>
         </div>
       );
 
