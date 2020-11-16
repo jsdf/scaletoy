@@ -1,31 +1,35 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "e3827b4267535e1752af0274846b859c",
+    "revision": "7cd4152ecad9d14f1d18465b55050483",
     "url": "/scaletoy/index.html"
   },
   {
-    "revision": "f42db5ddd9dd08eca5b4",
+    "revision": "52bb1252cb281224e0de",
     "url": "/scaletoy/static/css/main.cd556cfb.chunk.css"
   },
   {
-    "revision": "0d8336078f77d3ba7337",
-    "url": "/scaletoy/static/js/2.13732046.chunk.js"
+    "revision": "8b72ab346e8e68f4010e",
+    "url": "/scaletoy/static/js/2.8e8ff8b0.chunk.js"
   },
   {
-    "revision": "47ebb786033d11f00d99",
-    "url": "/scaletoy/static/js/3.a62448df.chunk.js"
+    "revision": "aeaaab0423f6b47d35f7",
+    "url": "/scaletoy/static/js/3.cb11a6aa.chunk.js"
   },
   {
-    "revision": "5b2f5a56daa04fb81bc2",
-    "url": "/scaletoy/static/js/4.1dc98502.chunk.js"
+    "revision": "9b0e2656d2bb62607ea1",
+    "url": "/scaletoy/static/js/4.c58967e7.chunk.js"
   },
   {
-    "revision": "f42db5ddd9dd08eca5b4",
-    "url": "/scaletoy/static/js/main.a07c99b5.chunk.js"
+    "revision": "5048eb163d2b71b6088b",
+    "url": "/scaletoy/static/js/5.820b4fd5.chunk.js"
   },
   {
-    "revision": "235ab979948a53055f55",
-    "url": "/scaletoy/static/js/runtime~main.19dd8242.js"
+    "revision": "52bb1252cb281224e0de",
+    "url": "/scaletoy/static/js/main.737b7708.chunk.js"
+  },
+  {
+    "revision": "3e9bb14503bae5c99a06",
+    "url": "/scaletoy/static/js/runtime~main.a5a65f67.js"
   },
   {
     "revision": "31b946a6f352df5ea4a994fd07f3461c",
@@ -42,9 +46,5 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
     "revision": "bef162da6984bab8f9a40266f6cc0b51",
     "url": "/scaletoy/static/media/dexed-epiano-Fs2.bef162da.m4a"
-  },
-  {
-    "revision": "5d5d9eefa31e5e13a6610d9fa7a283bb",
-    "url": "/scaletoy/static/media/logo.5d5d9eef.svg"
   }
 ]);

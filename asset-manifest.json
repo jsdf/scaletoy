@@ -1,24 +1,25 @@
 {
   "files": {
     "main.css": "/scaletoy/static/css/main.cd556cfb.chunk.css",
-    "main.js": "/scaletoy/static/js/main.a07c99b5.chunk.js",
-    "main.js.map": "/scaletoy/static/js/main.a07c99b5.chunk.js.map",
-    "runtime~main.js": "/scaletoy/static/js/runtime~main.19dd8242.js",
-    "runtime~main.js.map": "/scaletoy/static/js/runtime~main.19dd8242.js.map",
-    "static/js/2.13732046.chunk.js": "/scaletoy/static/js/2.13732046.chunk.js",
-    "static/js/2.13732046.chunk.js.map": "/scaletoy/static/js/2.13732046.chunk.js.map",
-    "static/js/3.a62448df.chunk.js": "/scaletoy/static/js/3.a62448df.chunk.js",
-    "static/js/3.a62448df.chunk.js.map": "/scaletoy/static/js/3.a62448df.chunk.js.map",
-    "static/js/4.1dc98502.chunk.js": "/scaletoy/static/js/4.1dc98502.chunk.js",
-    "static/js/4.1dc98502.chunk.js.map": "/scaletoy/static/js/4.1dc98502.chunk.js.map",
+    "main.js": "/scaletoy/static/js/main.737b7708.chunk.js",
+    "main.js.map": "/scaletoy/static/js/main.737b7708.chunk.js.map",
+    "runtime~main.js": "/scaletoy/static/js/runtime~main.a5a65f67.js",
+    "runtime~main.js.map": "/scaletoy/static/js/runtime~main.a5a65f67.js.map",
+    "static/js/2.8e8ff8b0.chunk.js": "/scaletoy/static/js/2.8e8ff8b0.chunk.js",
+    "static/js/2.8e8ff8b0.chunk.js.map": "/scaletoy/static/js/2.8e8ff8b0.chunk.js.map",
+    "static/js/3.cb11a6aa.chunk.js": "/scaletoy/static/js/3.cb11a6aa.chunk.js",
+    "static/js/3.cb11a6aa.chunk.js.map": "/scaletoy/static/js/3.cb11a6aa.chunk.js.map",
+    "static/js/4.c58967e7.chunk.js": "/scaletoy/static/js/4.c58967e7.chunk.js",
+    "static/js/4.c58967e7.chunk.js.map": "/scaletoy/static/js/4.c58967e7.chunk.js.map",
+    "static/js/5.820b4fd5.chunk.js": "/scaletoy/static/js/5.820b4fd5.chunk.js",
+    "static/js/5.820b4fd5.chunk.js.map": "/scaletoy/static/js/5.820b4fd5.chunk.js.map",
     "index.html": "/scaletoy/index.html",
-    "precache-manifest.00bc69b9e2f715d23b2ac668c0161d6d.js": "/scaletoy/precache-manifest.00bc69b9e2f715d23b2ac668c0161d6d.js",
+    "precache-manifest.4a838dcff85dbfb3bcf04dda700e1dc4.js": "/scaletoy/precache-manifest.4a838dcff85dbfb3bcf04dda700e1dc4.js",
     "service-worker.js": "/scaletoy/service-worker.js",
     "static/css/main.cd556cfb.chunk.css.map": "/scaletoy/static/css/main.cd556cfb.chunk.css.map",
     "static/media/dexed-epiano-A2.m4a": "/scaletoy/static/media/dexed-epiano-A2.31b946a6.m4a",
     "static/media/dexed-epiano-C2.m4a": "/scaletoy/static/media/dexed-epiano-C2.27b8774e.m4a",
     "static/media/dexed-epiano-Ds2.m4a": "/scaletoy/static/media/dexed-epiano-Ds2.afd18e11.m4a",
-    "static/media/dexed-epiano-Fs2.m4a": "/scaletoy/static/media/dexed-epiano-Fs2.bef162da.m4a",
-    "static/media/logo.svg": "/scaletoy/static/media/logo.5d5d9eef.svg"
+    "static/media/dexed-epiano-Fs2.m4a": "/scaletoy/static/media/dexed-epiano-Fs2.bef162da.m4a"
   }
 }
