@@ -1,10 +1,10 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "7cd4152ecad9d14f1d18465b55050483",
+    "revision": "a0a12ad07d9b34b44bfefa38052cb81b",
     "url": "/scaletoy/index.html"
   },
   {
-    "revision": "52bb1252cb281224e0de",
+    "revision": "f953dfc70c2b2ced8c00",
     "url": "/scaletoy/static/css/main.cd556cfb.chunk.css"
   },
   {
@@ -24,8 +24,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/scaletoy/static/js/5.820b4fd5.chunk.js"
   },
   {
-    "revision": "52bb1252cb281224e0de",
-    "url": "/scaletoy/static/js/main.737b7708.chunk.js"
+    "revision": "f953dfc70c2b2ced8c00",
+    "url": "/scaletoy/static/js/main.a1e5fae5.chunk.js"
   },
   {
     "revision": "3e9bb14503bae5c99a06",
