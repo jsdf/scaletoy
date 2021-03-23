@@ -11,7 +11,6 @@ import MidiDeviceSelector from './MidiDeviceSelector';
 import Keyboard from './Keyboard';
 import Scaleboard from './Scaleboard';
 import MidiExport from './MidiExport';
-import simplifyEnharmonics from './simplifyEnharmonics';
 import Details from './Details';
 import Select from './Select';
 import Range from './Range';
@@ -128,13 +127,13 @@ function onTick(events, audioApi, onMidi) {
   return i === 0 ? events : events.slice(i);
 }
 
-function playNote(events, noteName, start, end) {
+function playNoteOnOff(events, noteName, start, end) {
   const noteMidi = Tonal.note(noteName).midi;
 
   let updatedEvents = events;
   // end any upcoming events for this key
   events.forEach((ev) => {
-    if (ev.message[1] == noteMidi) {
+    if (ev.message[1] === noteMidi) {
       ev.time = start - 0.01;
       ev.message[0] = NOTE_OFF;
     }
@@ -148,6 +147,28 @@ function playNote(events, noteName, start, end) {
     {
       message: [NOTE_OFF, noteMidi, velocityMidi],
       time: end,
+    },
+  ]);
+}
+function playNoteOn(events, noteName, time) {
+  const noteMidi = Tonal.note(noteName).midi;
+
+  let updatedEvents = events;
+  return addEvents(updatedEvents, [
+    {
+      message: [NOTE_ON, noteMidi, velocityMidi],
+      time: time,
+    },
+  ]);
+}
+function playNoteOff(events, noteName, time) {
+  const noteMidi = Tonal.note(noteName).midi;
+
+  let updatedEvents = events;
+  return addEvents(updatedEvents, [
+    {
+      message: [NOTE_OFF, noteMidi, velocityMidi],
+      time: time,
     },
   ]);
 }
@@ -290,6 +311,11 @@ function App({audioApi}) {
     false,
     QUERY_PARAM_FORMATS.boolean
   );
+  const [oneShot, setOneShot] = useQueryParam(
+    'oneShot',
+    true,
+    QUERY_PARAM_FORMATS.boolean
+  );
   const [lastChord, setLastChord] = React.useState(null);
   const [octave, setOctave] = useQueryParam(
     'octave',
@@ -344,7 +370,7 @@ function App({audioApi}) {
       scaleNotes.forEach((noteName) => {
         lastStartTimeOffset += beatDurationSeconds;
 
-        updatedEvents = playNote(
+        updatedEvents = playNoteOnOff(
           updatedEvents,
           noteName,
           currentTime + lastStartTimeOffset,
@@ -357,7 +383,7 @@ function App({audioApi}) {
   }, [setEvents, audioApi, scaleData]);
 
   const playChord = React.useCallback(
-    (chordData, octave, strumming, strumMode) => {
+    (chordData, octave, strumming, strumMode, source) => {
       const chordNotes = chordData.chordNotesForOctave;
 
       setEvents((events) => {
@@ -375,20 +401,53 @@ function App({audioApi}) {
 
         notes.forEach((noteName, i) => {
           const strumDelay = i * (strumming / 1000);
-          updatedEvents = playNote(
-            updatedEvents,
-            noteName,
-            currentTime + strumDelay,
-            currentTime + beatDurationSeconds + i * (strumming / 1000)
-          );
+          if (oneShot) {
+            updatedEvents = playNoteOnOff(
+              updatedEvents,
+              noteName,
+              currentTime + strumDelay,
+              currentTime + beatDurationSeconds + i * (strumming / 1000)
+            );
+          } else {
+            updatedEvents = playNoteOn(
+              updatedEvents,
+              noteName,
+              currentTime + strumDelay
+            );
+          }
         });
 
         return updatedEvents;
       });
 
-      setHistory((s) => s.concat(chordData));
+      if (source !== 'history') {
+        setHistory((s) => s.concat(chordData));
+        setLastChord(chordData.chordName);
+      }
     },
-    [setEvents, audioApi]
+    [setEvents, audioApi, oneShot]
+  );
+
+  const endChord = React.useCallback(
+    (chordData, octave, strumming, strumMode, source) => {
+      if (oneShot) return;
+      const chordNotes = chordData.chordNotesForOctave;
+
+      setEvents((events) => {
+        let updatedEvents = events;
+
+        const currentTime = audioApi.actx.currentTime;
+
+        let notes = chordNotes.slice();
+
+        notes.forEach((noteName, i) => {
+          updatedEvents = playNoteOff(updatedEvents, noteName, currentTime);
+        });
+
+        return updatedEvents;
+      });
+    },
+    [setEvents, audioApi, oneShot]
   );
 
   useValueObserver(scaleData, setHighlightedScale);
@@ -425,7 +484,7 @@ function App({audioApi}) {
     return () => {
       clearInterval(id);
     };
-  }, [onMidi]);
+  }, [onMidi, audioApi]);
 
   return (
     <div className="App" style={alignLeft}>
@@ -526,13 +585,14 @@ function App({audioApi}) {
                       {...{
                         chordData,
                         playChord,
-                        setLastChord: () => {},
+                        endChord,
                         octave,
                         strumming,
                         strumMode,
                         showScaleDegrees,
                         selected: false,
                         onMouseOver: setHighlightedChord,
+                        source: 'history',
                       }}
                     />
                   </div>
@@ -566,6 +626,7 @@ function App({audioApi}) {
           onChange={setIncludeExtra}
           checked={includeExtra}
         />
+        <Checkbox label="oneshot" onChange={setOneShot} checked={oneShot} />
         <div style={{...flexColContainer, ...alignCenter}}>
           <div style={flexCol}>
             {scaleData.sizes
@@ -597,7 +658,8 @@ function App({audioApi}) {
                                   {...{
                                     chordData,
                                     playChord,
-                                    setLastChord,
+                                    endChord,
+                                    source: 'grid',
                                     octave,
                                     strumming,
                                     strumMode,

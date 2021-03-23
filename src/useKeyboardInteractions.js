@@ -29,7 +29,7 @@ export default function useKeyboardInteractions({notePlayer}) {
         }
       },
     };
-  }, [setPressedKeys]);
+  }, [setPressedKeys, notePlayer]);
 
   function makeHandlers(noteName) {
     return {

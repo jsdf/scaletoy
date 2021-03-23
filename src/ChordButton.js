@@ -1,5 +1,7 @@
 import React from 'react';
 
+import {useRef} from 'react';
+
 const SHOW_NOTE_NAMES = true;
 const SHOW_NOTE_OCTS = true;
 const SHOW_FULL_CHORD_NAMES = false;
@@ -25,7 +27,8 @@ const buttonStyle = {
 export default React.memo(function ChordButton({
   chordData,
   playChord,
-  setLastChord,
+  endChord,
+  source,
   octave,
   strumming,
   strumMode,
@@ -34,6 +37,8 @@ export default React.memo(function ChordButton({
   onMouseOver,
 }) {
   let noteNames = null;
+
+  const chordStartedRef = useRef(false);
 
   if (SHOW_NOTE_NAMES) {
     if (showScaleDegrees) {
@@ -68,16 +73,30 @@ export default React.memo(function ChordButton({
         borderColor: selected ? 'rgba(0,0,0,0.2)' : 'transparent',
       }}
       onMouseDown={() => {
-        playChord(chordData, octave, strumming, strumMode);
-        setLastChord(chordData.chordName);
+        chordStartedRef.current = true;
+        playChord(chordData, octave, strumming, strumMode, source);
         console.log(chordData);
+      }}
+      onMouseUp={() => {
+        if (chordStartedRef.current) {
+          endChord(chordData, octave, strumming, strumMode, source);
+        }
+        chordStartedRef.current = false;
       }}
       onMouseEnter={(e) => {
         if (e.buttons > 0) {
-          playChord(chordData, octave, strumming, strumMode);
-          setLastChord(chordData.chordName);
+          chordStartedRef.current = true;
+          playChord(chordData, octave, strumming, strumMode, source);
         }
         onMouseOver(chordData.chordNotesForOctave);
+      }}
+      onMouseLeave={(e) => {
+        if (e.buttons > 0) {
+          if (chordStartedRef.current) {
+            endChord(chordData, octave, strumming, strumMode, source);
+          }
+          chordStartedRef.current = false;
+        }
       }}
     >
       <div>
