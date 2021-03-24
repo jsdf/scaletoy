@@ -19,7 +19,7 @@ const buttonStyle = {
   color: 'black',
   padding: 4,
   paddingBottom: 8,
-  height: 46,
+  height: SHOW_FULL_CHORD_NAMES ? 62 : 46,
   overflow: 'hidden',
   textAlign: 'center',
 };
@@ -74,26 +74,26 @@ export default React.memo(function ChordButton({
       }}
       onMouseDown={() => {
         chordStartedRef.current = true;
-        playChord(chordData, octave, strumming, strumMode, source);
+        playChord(chordData, strumming, strumMode, source);
         console.log(chordData);
       }}
       onMouseUp={() => {
         if (chordStartedRef.current) {
-          endChord(chordData, octave, strumming, strumMode, source);
+          endChord(chordData, strumming, strumMode, source);
         }
         chordStartedRef.current = false;
       }}
       onMouseEnter={(e) => {
         if (e.buttons > 0) {
           chordStartedRef.current = true;
-          playChord(chordData, octave, strumming, strumMode, source);
+          playChord(chordData, strumming, strumMode, source);
         }
         onMouseOver(chordData.chordNotesForOctave);
       }}
       onMouseLeave={(e) => {
         if (e.buttons > 0) {
           if (chordStartedRef.current) {
-            endChord(chordData, octave, strumming, strumMode, source);
+            endChord(chordData, strumming, strumMode, source);
           }
           chordStartedRef.current = false;
         }

@@ -1,14 +1,19 @@
 import React from 'react';
 
-export default function Select({label, options, value, onChange}) {
+export default function Select({label, options, type, value, onChange}) {
   return (
     <label>
       {label}:{' '}
       <select
         value={value}
         onChange={React.useCallback(
-          (event) => onChange(event.currentTarget.value),
-          [onChange]
+          (event) =>
+            onChange(
+              type === 'number'
+                ? parseFloat(event.currentTarget.value)
+                : event.currentTarget.value
+            ),
+          [onChange, type]
         )}
       >
         {options.map((key) => {

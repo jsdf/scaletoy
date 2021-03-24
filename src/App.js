@@ -26,6 +26,9 @@ strummingTimes.forEach((v, i) => {
   strummingTimesIndex[v] = i;
 });
 
+function range(size, startAt = 0) {
+  return [...Array(size).keys()].map((i) => i + startAt);
+}
 function transposeByOctaves(note, shift) {
   return `${note.pc}${note.oct + shift}`;
 }
@@ -248,15 +251,7 @@ function makeScaleData(key, scaleType, octave) {
     })
   );
 
-  const chordDatasByName = new Map(
-    Array.from(scalePosChords.values).map((chordData) => [
-      chordData.chordName,
-      chordData,
-    ])
-  );
-
   const sizes = new Set();
-
   scalePosChords.forEach((chordDatas, pos) => {
     chordDatas.forEach((chordData) => {
       sizes.add(chordData.size);
@@ -269,7 +264,6 @@ function makeScaleData(key, scaleType, octave) {
     scalePitchClasses,
     scalePosChords,
     scaleNotes,
-    chordDatasByName,
     sizes: Array.from(sizes).sort((a, b) => a - b),
   };
 }
@@ -338,6 +332,11 @@ function App({audioApi}) {
     7,
     QUERY_PARAM_FORMATS.integer
   );
+  const [chordPaletteOctaves, setChordPaletteOctaves] = useQueryParam(
+    'chordPaletteOctaves',
+    1,
+    QUERY_PARAM_FORMATS.integer
+  );
 
   const [highlightedKeys, setHighlightedKeys] = React.useState(null);
   const setHighlightedChord = React.useCallback(
@@ -353,6 +352,13 @@ function App({audioApi}) {
     scaleType,
     octave,
   ]);
+
+  const chordDataByOctave = React.useMemo(() => {
+    return range(chordPaletteOctaves).map((octaveOffset) => {
+      return makeScaleData(key, scaleType, octave + octaveOffset);
+    });
+  }, [key, scaleType, octave, chordPaletteOctaves]);
+
   const setHighlightedScale = React.useCallback(() => {
     setHighlightedKeys({keys: scaleData.scaleNotes, type: 'scale'});
   }, [scaleData]);
@@ -383,7 +389,7 @@ function App({audioApi}) {
   }, [setEvents, audioApi, scaleData]);
 
   const playChord = React.useCallback(
-    (chordData, octave, strumming, strumMode, source) => {
+    (chordData, strumming, strumMode, source) => {
       const chordNotes = chordData.chordNotesForOctave;
 
       setEvents((events) => {
@@ -429,7 +435,7 @@ function App({audioApi}) {
   );
 
   const endChord = React.useCallback(
-    (chordData, octave, strumming, strumMode, source) => {
+    (chordData, strumming, strumMode, source) => {
       if (oneShot) return;
       const chordNotes = chordData.chordNotesForOctave;
 
@@ -508,6 +514,7 @@ function App({audioApi}) {
           />{' '}
           <Select
             label="octave"
+            type="number"
             options={[1, 2, 3, 4, 5, 6, 7]}
             value={octave}
             onChange={setOctave}
@@ -532,6 +539,7 @@ function App({audioApi}) {
         <Select
           label="scale steps"
           options={[1, 2, 3, 4, 5, 6, 7]}
+          type="number"
           value={scaleSteps}
           onChange={setScaleSteps}
         />
@@ -586,7 +594,6 @@ function App({audioApi}) {
                         chordData,
                         playChord,
                         endChord,
-                        octave,
                         strumming,
                         strumMode,
                         showScaleDegrees,
@@ -621,62 +628,77 @@ function App({audioApi}) {
           value={strumMode}
           onChange={setStrumMode}
         />{' '}
+        <Select
+          label="octaves"
+          type="number"
+          options={[1, 2]}
+          value={chordPaletteOctaves}
+          onChange={setChordPaletteOctaves}
+        />{' '}
         <Checkbox
           label="include extra chords"
           onChange={setIncludeExtra}
           checked={includeExtra}
-        />
+        />{' '}
         <Checkbox label="oneshot" onChange={setOneShot} checked={oneShot} />
         <div style={{...flexColContainer, ...alignCenter}}>
-          <div style={flexCol}>
-            {scaleData.sizes
-              .filter((size) => (includeExtra ? true : size > 0))
-              .sort((a, b) => (SIZE_ASC ? a - b : b - a))
-              .map((size, sizeIndex) => (
-                <div key={sizeIndex}>
-                  {false && <div style={{flex: 1}}>{size}</div>}
-                  <br />
-                  <div key={size} style={{display: 'flex'}}>
-                    {Array.from(scaleData.scalePosChords).map(
-                      ([pos, chordDatas]) => {
-                        return (
-                          <div key={pos} style={{flex: 1}}>
-                            {sizeIndex === 0 && (
-                              <div>{scaleTypesPosNames[scaleType][pos]}</div>
-                            )}
+          {chordDataByOctave.map((scaleData, index) => {
+            return (
+              <div style={flexCol} key={index}>
+                {scaleData.sizes
+                  .filter((size) => (includeExtra ? true : size > 0))
+                  .sort((a, b) => (SIZE_ASC ? a - b : b - a))
+                  .map((size, sizeIndex) => (
+                    <div key={sizeIndex}>
+                      {false && <div style={{flex: 1}}>{size}</div>}
+                      <br />
+                      <div key={size} style={{display: 'flex'}}>
+                        {Array.from(scaleData.scalePosChords).map(
+                          ([pos, chordDatas]) => {
+                            return (
+                              <div key={pos} style={{flex: 1}}>
+                                {sizeIndex === 0 && (
+                                  <div>
+                                    {scaleTypesPosNames[scaleType][pos]}
+                                  </div>
+                                )}
 
-                            {chordDatas
-                              .filter((chordData) => chordData.size === size)
-                              // silly heuristic for simpler chords
-                              .sort(
-                                (a, b) =>
-                                  a.chordName.length - b.chordName.length
-                              )
-                              .map((chordData, i) => (
-                                <ChordButton
-                                  key={i}
-                                  {...{
-                                    chordData,
-                                    playChord,
-                                    endChord,
-                                    source: 'grid',
-                                    octave,
-                                    strumming,
-                                    strumMode,
-                                    showScaleDegrees,
-                                    selected: chordData.chordName === lastChord,
-                                    onMouseOver: setHighlightedChord,
-                                  }}
-                                />
-                              ))}
-                          </div>
-                        );
-                      }
-                    )}
-                  </div>
-                </div>
-              ))}
-          </div>
+                                {chordDatas
+                                  .filter(
+                                    (chordData) => chordData.size === size
+                                  )
+                                  // silly heuristic for simpler chords
+                                  .sort(
+                                    (a, b) =>
+                                      a.chordName.length - b.chordName.length
+                                  )
+                                  .map((chordData, i) => (
+                                    <ChordButton
+                                      key={i}
+                                      {...{
+                                        chordData,
+                                        playChord,
+                                        endChord,
+                                        source: 'grid',
+                                        strumming,
+                                        strumMode,
+                                        showScaleDegrees,
+                                        selected:
+                                          chordData.chordName === lastChord,
+                                        onMouseOver: setHighlightedChord,
+                                      }}
+                                    />
+                                  ))}
+                              </div>
+                            );
+                          }
+                        )}
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            );
+          })}
         </div>
       </Details>
       <Details summary="midi events">
