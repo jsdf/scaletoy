@@ -1,8 +1,8 @@
 {
   "files": {
     "main.css": "/scaletoy/static/css/main.cd556cfb.chunk.css",
-    "main.js": "/scaletoy/static/js/main.236ad22d.chunk.js",
-    "main.js.map": "/scaletoy/static/js/main.236ad22d.chunk.js.map",
+    "main.js": "/scaletoy/static/js/main.fc288853.chunk.js",
+    "main.js.map": "/scaletoy/static/js/main.fc288853.chunk.js.map",
     "runtime~main.js": "/scaletoy/static/js/runtime~main.c14b9020.js",
     "runtime~main.js.map": "/scaletoy/static/js/runtime~main.c14b9020.js.map",
     "static/js/2.c00082d8.chunk.js": "/scaletoy/static/js/2.c00082d8.chunk.js",
@@ -14,7 +14,7 @@
     "static/js/5.a6b275fc.chunk.js": "/scaletoy/static/js/5.a6b275fc.chunk.js",
     "static/js/5.a6b275fc.chunk.js.map": "/scaletoy/static/js/5.a6b275fc.chunk.js.map",
     "index.html": "/scaletoy/index.html",
-    "precache-manifest.a2529fc9648cb58eccdc0a831c467588.js": "/scaletoy/precache-manifest.a2529fc9648cb58eccdc0a831c467588.js",
+    "precache-manifest.9aadbc01fe4cbe9cac6d5384ede1f2d6.js": "/scaletoy/precache-manifest.9aadbc01fe4cbe9cac6d5384ede1f2d6.js",
     "service-worker.js": "/scaletoy/service-worker.js",
     "static/css/main.cd556cfb.chunk.css.map": "/scaletoy/static/css/main.cd556cfb.chunk.css.map",
     "static/media/dexed-epiano-A2.m4a": "/scaletoy/static/media/dexed-epiano-A2.31b946a6.m4a",
