@@ -27,8 +27,22 @@
     <script src="%PUBLIC_URL%/wam/dx7/gui/gui.js"></script>
     <script src="%PUBLIC_URL%/wam/dx7/gui/keys.js"></script>
     <link rel="stylesheet" href="%PUBLIC_URL%/wam/dx7/gui/dx7.css" />
-
-    <main class="dx7">
+    <div
+      class="intro"
+      style="text-align: center; margin: 32px; font-size: 1.2em"
+    >
+      <h1 style="font-size: 2em">scaletoy</h1>
+      <p>
+        scaletoy is a tool for writing music and exploring the relationship
+        between chords and scales.
+      </p>
+      <p>
+        it can also play chords and scales via midi to your music software and
+        gear, or via an in-browser synth.
+      </p>
+      <p>made by <a href="https://jamesfriend.com.au/">james friend</a></p>
+    </div>
+    <div class="dx7" style="visibility: hidden;">
       <details open>
         <summary>
           synthesizer
@@ -58,11 +72,12 @@
           <div id="keys"></div></div
       ></details>
       <!-- content -->
-    </main>
+    </div>
 
     <script src="%PUBLIC_URL%/dx7init.js"></script>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="unsupported">this browser is not supported</div>
+
     <div id="root"></div>
     <!--
       This HTML file is a template.

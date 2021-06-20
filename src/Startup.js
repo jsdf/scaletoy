@@ -34,7 +34,7 @@ function Theme() {
         <input
           type="checkbox"
           checked={darkMode}
-          onChange={() => setDarkMode(s => !s)}
+          onChange={() => setDarkMode((s) => !s)}
         />
       </label>
     </div>
@@ -63,6 +63,8 @@ function Startup() {
 
   const onStart = React.useCallback(() => {
     nonnull(document.querySelector('.dx7')).style.visibility = 'visible';
+    nonnull(document.querySelector('.intro')).style.display = 'none';
+
     setStartedAudio(true);
   }, [setStartedAudio]);
 
