@@ -447,7 +447,18 @@ function App({audioApi}) {
         let notes = chordNotes.slice();
 
         notes.forEach((noteName, i) => {
-          updatedEvents = playNoteOff(updatedEvents, noteName, currentTime);
+          const noteMidi = Tonal.note(noteName).midi;
+          updatedEvents = playNoteOff(
+            updatedEvents,
+            noteName,
+            currentTime
+          ).filter(
+            // remove any future note on for this note (e.g. strumming delayed starts)
+            (event) => {
+              const [status, data1] = event.message;
+              return !(status === NOTE_ON && data1 === noteMidi);
+            }
+          );
         });
 
         return updatedEvents;
