@@ -16,6 +16,7 @@ import Select from './Select';
 import Range from './Range';
 import Checkbox from './Checkbox';
 import ChordButton from './ChordButton';
+import Sticky from './Sticky';
 
 const SIZE_ASC = true;
 const SHOW_HISTORY = true;
@@ -35,7 +36,7 @@ function transposeByOctaves(note, shift) {
 
 function getChordsBySize(chords, key) {
   return chords
-    .map((chordType) => Chord.chord(`${key}${chordType}`))
+    .map((chordType) => Chord.get(`${key}${chordType}`))
     .sort((a, b) => a.intervals.length - b.intervals.length)
     .map((chord) => `${chord.tonic}${chord.aliases[0]}`);
 }
@@ -192,7 +193,7 @@ function makeOctaveScaleNoteSequence(key, octave, scaleType) {
 
 // get the notes for a chord, for an octave
 function getReifiedNotesForChord(chordName, octave) {
-  const chordData = Chord.chord(chordName);
+  const chordData = Chord.get(chordName);
   const tonicReified = chordData.tonic + octave;
   const notes = chordData.intervals.map((interval) =>
     Tonal.transpose(tonicReified, interval)
@@ -203,7 +204,7 @@ function getReifiedNotesForChord(chordName, octave) {
 // we need to make sure that the tonic is from the correct octave when the
 // scale spans multiple octaves
 function getReifiedNotesForChordForScale(chordName, scalePitchClassesNotesMap) {
-  const chordData = Chord.chord(chordName);
+  const chordData = Chord.get(chordName);
   const tonicReified = scalePitchClassesNotesMap[chordData.tonic];
   const notes = chordData.intervals.map((interval) =>
     Note.simplify(Tonal.transpose(tonicReified, interval))
@@ -233,7 +234,7 @@ function makeScaleData(key, scaleType, octave) {
         pos,
 
         chordNames.map((chordName) => {
-          const chord = Chord.chord(chordName);
+          const chord = Chord.get(chordName);
           return {
             pos,
             chord,
@@ -365,6 +366,13 @@ function App({audioApi}) {
 
   const [events, setEvents] = React.useState([]);
   const [midiOut, setMidiOut] = React.useState(null);
+  const [stickySection, setStickySection] = React.useState(null);
+  const onSetSticky = React.useCallback(
+    (name, enabled) => {
+      setStickySection((s) => (enabled ? name : null));
+    },
+    [setStickySection]
+  );
 
   const playScale = React.useCallback(() => {
     setEvents((events) => {
@@ -503,49 +511,57 @@ function App({audioApi}) {
     };
   }, [onMidi, audioApi]);
 
-  return (
-    <div className="App" style={alignLeft}>
-      <div /*controls*/>
-        <button onClick={suspendAudio}>pause audio</button>
-        <button onClick={resumeAudio}>resume audio</button>
-        {audioApi.dx7 && (
-          <Recorder actx={audioApi.actx} inputNode={audioApi.dx7} />
-        )}
-        <MidiDeviceSelector
-          type="output"
-          selectedPort={midiOut}
-          onChange={setMidiOut}
+  const controlsSection = (
+    <div>
+      <button onClick={suspendAudio}>pause audio</button>
+      <button onClick={resumeAudio}>resume audio</button>
+      {audioApi.dx7 && (
+        <Recorder actx={audioApi.actx} inputNode={audioApi.dx7} />
+      )}
+      <MidiDeviceSelector
+        type="output"
+        selectedPort={midiOut}
+        onChange={setMidiOut}
+      />
+      <div onMouseOver={setHighlightedScale}>
+        <Select
+          label="key"
+          options={keys}
+          value={scaleData.key}
+          onChange={setKey}
+        />{' '}
+        <Select
+          label="octave"
+          type="number"
+          options={[1, 2, 3, 4, 5, 6, 7]}
+          value={octave}
+          onChange={setOctave}
+        />{' '}
+        <Select
+          label="scale type"
+          options={allScales}
+          value={scaleType}
+          onChange={setScaleType}
+        />{' '}
+        <label>scale notes: </label>
+        {scaleData.scaleNotes.map((note) => Note.simplify(note)).join()}{' '}
+        <button onClick={playScale}>play scale</button>{' '}
+        <Checkbox
+          label="show notes as scale degrees"
+          onChange={setShowScaleDegrees}
+          checked={showScaleDegrees}
         />
-        <div onMouseOver={setHighlightedScale}>
-          <Select
-            label="key"
-            options={keys}
-            value={scaleData.key}
-            onChange={setKey}
-          />{' '}
-          <Select
-            label="octave"
-            type="number"
-            options={[1, 2, 3, 4, 5, 6, 7]}
-            value={octave}
-            onChange={setOctave}
-          />{' '}
-          <Select
-            label="scale type"
-            options={allScales}
-            value={scaleType}
-            onChange={setScaleType}
-          />{' '}
-          <label>scale notes: </label>
-          {scaleData.scaleNotes.map((note) => Note.simplify(note)).join()}{' '}
-          <button onClick={playScale}>play scale</button>{' '}
-          <Checkbox
-            label="show notes as scale degrees"
-            onChange={setShowScaleDegrees}
-            checked={showScaleDegrees}
-          />
-        </div>
       </div>
+    </div>
+  );
+
+  const scaleKeyboardSection = (
+    <Sticky
+      name="scaleKeyboardSection"
+      onSetSticky={onSetSticky}
+      sticky={stickySection === 'scaleKeyboardSection'}
+      className="background"
+    >
       <Details summary="scale keyboard" startOpen={true}>
         <Select
           label="scale steps"
@@ -570,6 +586,16 @@ function App({audioApi}) {
           scaleSteps={scaleSteps}
         />
       </Details>
+    </Sticky>
+  );
+
+  const chromaticKeyboardSection = (
+    <Sticky
+      name="chromaticKeyboardSection"
+      onSetSticky={onSetSticky}
+      sticky={stickySection === 'chromaticKeyboardSection'}
+      className="background"
+    >
       <Details summary="keyboard" startOpen={true}>
         <Keyboard
           highlightKeys={highlightedKeys ? highlightedKeys.keys : null}
@@ -579,144 +605,155 @@ function App({audioApi}) {
           notePlayer={notePlayer}
         />
       </Details>
-      {SHOW_HISTORY && (
-        <div style={alignLeft}>
-          <details>
-            <summary style={alignLeft}>
-              <div style={{display: 'initial'}}>history/export</div>
-            </summary>
-            <div style={{padding: '8px 0'}}>
-              <MidiExport
-                bpm={bpm}
-                history={history}
-                strumming={strumming}
-                beatDurationSeconds={beatDurationSeconds}
-              />
-              <button onClick={clearHistory}>clear history</button>
-            </div>
-            <div style={{width: `90vw`, overflow: 'auto', display: 'flex'}}>
-              {history
-                .slice()
-                .reverse()
-                .map((chordData, i) => (
-                  <div key={i} style={{width: `${(1 / 7) * 100}vw`}}>
-                    <ChordButton
-                      {...{
-                        chordData,
-                        playChord,
-                        endChord,
-                        strumming,
-                        strumMode,
-                        showScaleDegrees,
-                        selected: false,
-                        onMouseOver: setHighlightedChord,
-                        source: 'history',
-                      }}
-                    />
+    </Sticky>
+  );
+
+  const historySection = SHOW_HISTORY && (
+    <div style={alignLeft}>
+      <details>
+        <summary style={alignLeft}>
+          <div style={{display: 'initial'}}>history/export</div>
+        </summary>
+        <div style={{padding: '8px 0'}}>
+          <MidiExport
+            bpm={bpm}
+            history={history}
+            strumming={strumming}
+            beatDurationSeconds={beatDurationSeconds}
+          />
+          <button onClick={clearHistory}>clear history</button>
+        </div>
+        <div style={{width: `90vw`, overflow: 'auto', display: 'flex'}}>
+          {history
+            .slice()
+            .reverse()
+            .map((chordData, i) => (
+              <div key={i} style={{width: `${(1 / 7) * 100}vw`}}>
+                <ChordButton
+                  {...{
+                    chordData,
+                    playChord,
+                    endChord,
+                    strumming,
+                    strumMode,
+                    showScaleDegrees,
+                    selected: false,
+                    onMouseOver: setHighlightedChord,
+                    source: 'history',
+                  }}
+                />
+              </div>
+            ))}
+          {history.length === 0 && <div>played chords will appear here</div>}
+        </div>
+      </details>
+    </div>
+  );
+
+  const chordPaletteSection = (
+    <Details summary="chord palette" startOpen={true}>
+      <Range
+        label="strumming"
+        min={0}
+        max={strummingTimes.length - 1}
+        value={strummingTimesIndex[strumming]}
+        onChange={(value) => {
+          setStrumming(strummingTimes[value]);
+        }}
+      />
+      <Select
+        label="strum mode"
+        options={['up', 'down', 'random']}
+        value={strumMode}
+        onChange={setStrumMode}
+      />{' '}
+      <Select
+        label="octaves"
+        type="number"
+        options={[1, 2]}
+        value={chordPaletteOctaves}
+        onChange={setChordPaletteOctaves}
+      />{' '}
+      <Checkbox
+        label="include extra chords"
+        onChange={setIncludeExtra}
+        checked={includeExtra}
+      />{' '}
+      <Checkbox label="oneshot" onChange={setOneShot} checked={oneShot} />
+      <div style={{...flexColContainer, ...alignCenter}}>
+        {chordDataByOctave.map((scaleData, index) => {
+          return (
+            <div style={flexCol} key={index}>
+              {scaleData.sizes
+                .filter((size) => (includeExtra ? true : size > 0))
+                .sort((a, b) => (SIZE_ASC ? a - b : b - a))
+                .map((size, sizeIndex) => (
+                  <div key={sizeIndex}>
+                    {false && <div style={{flex: 1}}>{size}</div>}
+                    <br />
+                    <div key={size} style={{display: 'flex'}}>
+                      {Array.from(scaleData.scalePosChords).map(
+                        ([pos, chordDatas]) => {
+                          return (
+                            <div key={pos} style={{flex: 1}}>
+                              {sizeIndex === 0 && (
+                                <div>{scaleTypesPosNames[scaleType][pos]}</div>
+                              )}
+
+                              {chordDatas
+                                .filter((chordData) => chordData.size === size)
+                                // silly heuristic for simpler chords
+                                .sort(
+                                  (a, b) =>
+                                    a.chordName.length - b.chordName.length
+                                )
+                                .map((chordData, i) => (
+                                  <ChordButton
+                                    key={i}
+                                    {...{
+                                      chordData,
+                                      playChord,
+                                      endChord,
+                                      source: 'grid',
+                                      strumming,
+                                      strumMode,
+                                      showScaleDegrees,
+                                      selected:
+                                        chordData.chordName === lastChord,
+                                      onMouseOver: setHighlightedChord,
+                                    }}
+                                  />
+                                ))}
+                            </div>
+                          );
+                        }
+                      )}
+                    </div>
                   </div>
                 ))}
-              {history.length === 0 && (
-                <div>played chords will appear here</div>
-              )}
             </div>
-          </details>
-        </div>
-      )}
+          );
+        })}
+      </div>
+    </Details>
+  );
 
-      <Details summary="chord palette" startOpen={true}>
-        <Range
-          label="strumming"
-          min={0}
-          max={strummingTimes.length - 1}
-          value={strummingTimesIndex[strumming]}
-          onChange={(value) => {
-            setStrumming(strummingTimes[value]);
-          }}
-        />
-        <Select
-          label="strum mode"
-          options={['up', 'down', 'random']}
-          value={strumMode}
-          onChange={setStrumMode}
-        />{' '}
-        <Select
-          label="octaves"
-          type="number"
-          options={[1, 2]}
-          value={chordPaletteOctaves}
-          onChange={setChordPaletteOctaves}
-        />{' '}
-        <Checkbox
-          label="include extra chords"
-          onChange={setIncludeExtra}
-          checked={includeExtra}
-        />{' '}
-        <Checkbox label="oneshot" onChange={setOneShot} checked={oneShot} />
-        <div style={{...flexColContainer, ...alignCenter}}>
-          {chordDataByOctave.map((scaleData, index) => {
-            return (
-              <div style={flexCol} key={index}>
-                {scaleData.sizes
-                  .filter((size) => (includeExtra ? true : size > 0))
-                  .sort((a, b) => (SIZE_ASC ? a - b : b - a))
-                  .map((size, sizeIndex) => (
-                    <div key={sizeIndex}>
-                      {false && <div style={{flex: 1}}>{size}</div>}
-                      <br />
-                      <div key={size} style={{display: 'flex'}}>
-                        {Array.from(scaleData.scalePosChords).map(
-                          ([pos, chordDatas]) => {
-                            return (
-                              <div key={pos} style={{flex: 1}}>
-                                {sizeIndex === 0 && (
-                                  <div>
-                                    {scaleTypesPosNames[scaleType][pos]}
-                                  </div>
-                                )}
+  const midiEventLogSection = (
+    <Details summary="midi events">
+      <pre style={{height: 300, overflow: 'auto'}}>
+        {events.map((ev) => JSON.stringify(ev)).join('\n')}
+      </pre>
+    </Details>
+  );
 
-                                {chordDatas
-                                  .filter(
-                                    (chordData) => chordData.size === size
-                                  )
-                                  // silly heuristic for simpler chords
-                                  .sort(
-                                    (a, b) =>
-                                      a.chordName.length - b.chordName.length
-                                  )
-                                  .map((chordData, i) => (
-                                    <ChordButton
-                                      key={i}
-                                      {...{
-                                        chordData,
-                                        playChord,
-                                        endChord,
-                                        source: 'grid',
-                                        strumming,
-                                        strumMode,
-                                        showScaleDegrees,
-                                        selected:
-                                          chordData.chordName === lastChord,
-                                        onMouseOver: setHighlightedChord,
-                                      }}
-                                    />
-                                  ))}
-                              </div>
-                            );
-                          }
-                        )}
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            );
-          })}
-        </div>
-      </Details>
-      <Details summary="midi events">
-        <pre style={{height: 300, overflow: 'auto'}}>
-          {events.map((ev) => JSON.stringify(ev)).join('\n')}
-        </pre>
-      </Details>
+  return (
+    <div className="App" style={alignLeft}>
+      {controlsSection}
+      {scaleKeyboardSection}
+      {chromaticKeyboardSection}
+      {historySection}
+      {chordPaletteSection}
+      {midiEventLogSection}
     </div>
   );
 }

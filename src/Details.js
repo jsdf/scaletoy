@@ -13,9 +13,11 @@ export default function Details({summary, children, startOpen}) {
   );
 
   return (
-    <details open={open}>
-      <summary onClick={onToggle}>{summary}</summary>
-      {open && children}
-    </details>
+    <>
+      <details open={open}>
+        <summary onClick={onToggle}>{summary}</summary>
+        {open && children}
+      </details>
+    </>
   );
 }

@@ -33,6 +33,11 @@
 }
 
 body {
+  background: white;
+}
+
+.background {
+  background: white;
 }
 
 * {
@@ -56,6 +61,11 @@ button {
   background: #334;
   color: white;
 }
+
+.dark-mode .background {
+  background: #334;
+}
+
 html.dark-mode {
   /*filter: invert(100%);*/
 }
@@ -86,4 +96,8 @@ select {
   height: 20px;
   margin-top: 10px;
   cursor: pointer;
+}
+
+input[type='checkbox'] {
+  vertical-align: middle;
 }
