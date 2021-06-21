@@ -33,7 +33,7 @@ export default {
     borderBottomRightRadius: 3,
     width: 9,
     height: 50,
-    background: 'black',
+    background: '#000',
     border: 'solid 1px black',
 
     zIndex: 1,

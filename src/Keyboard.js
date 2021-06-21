@@ -11,25 +11,46 @@ const whiteNotes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
 const notesWithSharps = new Set(['C', 'D', 'F', 'G', 'A']);
 
 const highlightTypeColors = {
-  scale: '#4287f5',
-  chord: 'orange',
+  scale: '#0055dc',
+  keys: 'orange',
 };
 
 function Keyboard(props: {
-  highlightKeys: Array<string>;
-  startOctave: number;
-  octaves: number;
-  highlightType: string;
-  notePlayer: Object;
+  highlightKeys: Array<string>,
+  highlightScale: Array<string>,
+  startOctave: number,
+  octaves: number,
+  notePlayer: Object,
 }) {
   const numKeys = whiteNotes.length * props.octaves;
   const keys = [];
 
-  const {highlightKeys, highlightType, notePlayer} = props;
+  const {highlightKeys, highlightScale, notePlayer} = props;
 
   const highlightKeysSharpified = React.useMemo(
     () => (highlightKeys ? highlightKeys.map(simplifyEnharmonics) : null),
     [highlightKeys]
+  );
+
+  const highlightScaleSharpified = React.useMemo(
+    () => (highlightScale ? highlightScale.map(simplifyEnharmonics) : null),
+    [highlightScale]
+  );
+
+  const getKeyHighlightStyles = React.useCallback(
+    (note, noteName) => {
+      const sharp = note[1] === '#';
+      return {
+        ...(highlightKeysSharpified &&
+        highlightKeysSharpified.includes(noteName)
+          ? {background: highlightTypeColors.keys}
+          : null),
+        ...(highlightScaleSharpified && highlightScaleSharpified.includes(note)
+          ? {boxShadow: `inset -0px -4px ${highlightTypeColors.scale}`}
+          : {boxShadow: `inset -0px -4px #${sharp ? '333' : 'aaa'}`}),
+      };
+    },
+    [highlightScaleSharpified, highlightKeysSharpified]
   );
 
   const {pressedKeys, makeHandlers} = useKeyboardInteractions({notePlayer});
@@ -44,10 +65,7 @@ function Keyboard(props: {
           {...makeHandlers(noteName)}
           style={{
             ...styles.whiteKey,
-            ...(highlightKeysSharpified &&
-            highlightKeysSharpified.includes(noteName)
-              ? {background: highlightTypeColors[highlightType]}
-              : null),
+            ...getKeyHighlightStyles(note, noteName),
             ...(pressedKeys.has(noteName) ? styles.pressed : null),
             left:
               (octaveOffset * whiteNotes.length + noteOffset) *
@@ -65,10 +83,8 @@ function Keyboard(props: {
             {...makeHandlers(noteNameSharp)}
             style={{
               ...styles.blackKey,
-              ...(highlightKeysSharpified &&
-              highlightKeysSharpified.includes(noteNameSharp)
-                ? {background: highlightTypeColors[highlightType]}
-                : null),
+              ...getKeyHighlightStyles(note + '#', noteNameSharp),
+              ...(pressedKeys.has(noteNameSharp) ? styles.pressed : null),
               left:
                 (octaveOffset * whiteNotes.length + noteOffset + 1) *
                   (styles.whiteKey.width - 1) -

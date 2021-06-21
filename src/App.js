@@ -17,6 +17,7 @@ import Range from './Range';
 import Checkbox from './Checkbox';
 import ChordButton from './ChordButton';
 import Sticky from './Sticky';
+import simplifyEnharmonics from './simplifyEnharmonics';
 
 const SIZE_ASC = true;
 const SHOW_HISTORY = true;
@@ -34,9 +35,9 @@ function transposeByOctaves(note, shift) {
   return `${note.pc}${note.oct + shift}`;
 }
 
-function getChordsBySize(chords, key) {
+function getChordsBySize(chords, pc) {
   return chords
-    .map((chordType) => Chord.get(`${key}${chordType}`))
+    .map((chordType) => Chord.get(`${pc}${chordType}`))
     .sort((a, b) => a.intervals.length - b.intervals.length)
     .map((chord) => `${chord.tonic}${chord.aliases[0]}`);
 }
@@ -105,7 +106,8 @@ function getScaleChords(key, scaleType) {
   return Scale.scale(key + ' ' + scaleType).notes.map((pc, pos) =>
     getChordsBySize(
       Scale.scaleChords(scaleTypesChordPatterns[scaleType][pos]),
-      pc
+      // pc // TODO simplifyEnharmonics(pc) but without breaking other stuff
+      simplifyEnharmonics(pc)
     )
   );
 }
@@ -225,7 +227,9 @@ function makeScaleData(key, scaleType, octave) {
   const scaleNotes = reifyScaleNotesWithOctave(scale, octave);
   const scalePitchClassesNotesMap = {};
   scaleNotes.forEach((noteName) => {
-    scalePitchClassesNotesMap[Tonal.note(noteName).pc] = noteName;
+    scalePitchClassesNotesMap[
+      simplifyEnharmonics(Tonal.note(noteName).pc)
+    ] = noteName;
   });
 
   const scalePosChords = new Map(
@@ -339,12 +343,6 @@ function App({audioApi}) {
     QUERY_PARAM_FORMATS.integer
   );
 
-  const [highlightedKeys, setHighlightedKeys] = React.useState(null);
-  const setHighlightedChord = React.useCallback(
-    (keys) => setHighlightedKeys({keys, type: 'chord'}),
-    [setHighlightedKeys]
-  );
-
   const [history, setHistory] = React.useState([]);
   const clearHistory = React.useCallback(() => setHistory([]), [setHistory]);
 
@@ -354,15 +352,19 @@ function App({audioApi}) {
     octave,
   ]);
 
+  const [highlightedKeys, setHighlightedKeys] = React.useState(null);
+  const [highlightedScale, setHighlightedScale] = React.useState(null);
+
+  const setHighlightedScaleToCurrentScale = React.useCallback(
+    () => setHighlightedScale(scaleData.scalePitchClasses),
+    [scaleData.scalePitchClasses]
+  );
+
   const chordDataByOctave = React.useMemo(() => {
     return range(chordPaletteOctaves).map((octaveOffset) => {
       return makeScaleData(key, scaleType, octave + octaveOffset);
     });
   }, [key, scaleType, octave, chordPaletteOctaves]);
-
-  const setHighlightedScale = React.useCallback(() => {
-    setHighlightedKeys({keys: scaleData.scaleNotes, type: 'scale'});
-  }, [scaleData]);
 
   const [events, setEvents] = React.useState([]);
   const [midiOut, setMidiOut] = React.useState(null);
@@ -475,7 +477,10 @@ function App({audioApi}) {
     [setEvents, audioApi, oneShot]
   );
 
-  useValueObserver(scaleData, setHighlightedScale);
+  useValueObserver(scaleData, setHighlightedScaleToCurrentScale);
+  React.useEffect(() => {
+    setHighlightedScaleToCurrentScale();
+  }, []);
 
   const onMidi = React.useMemo(() => {
     if (midiOut) {
@@ -523,7 +528,7 @@ function App({audioApi}) {
         selectedPort={midiOut}
         onChange={setMidiOut}
       />
-      <div onMouseOver={setHighlightedScale}>
+      <div>
         <Select
           label="key"
           options={keys}
@@ -572,15 +577,10 @@ function App({audioApi}) {
         />
         <Scaleboard
           scalePitchClasses={scaleData.scalePitchClasses}
-          highlightKeys={
-            highlightedKeys && highlightedKeys.type !== 'scale'
-              ? highlightedKeys.keys
-              : null
-          }
+          highlightKeys={highlightedKeys}
           setOctave={setOctave}
           startOctave={Math.max(0, octave - 1)}
           octaves={5}
-          highlightType={highlightedKeys ? highlightedKeys.type : 'scale'}
           notePlayer={notePlayer}
           showScaleDegrees={showScaleDegrees}
           scaleSteps={scaleSteps}
@@ -598,10 +598,10 @@ function App({audioApi}) {
     >
       <Details summary="keyboard" startOpen={true}>
         <Keyboard
-          highlightKeys={highlightedKeys ? highlightedKeys.keys : null}
+          highlightKeys={highlightedKeys}
+          highlightScale={highlightedScale}
           startOctave={Math.max(0, octave - 1)}
           octaves={5}
-          highlightType={highlightedKeys ? highlightedKeys.type : 'scale'}
           notePlayer={notePlayer}
         />
       </Details>
@@ -638,7 +638,7 @@ function App({audioApi}) {
                     strumMode,
                     showScaleDegrees,
                     selected: false,
-                    onMouseOver: setHighlightedChord,
+                    onMouseOver: setHighlightedKeys,
                     source: 'history',
                   }}
                 />
@@ -720,7 +720,7 @@ function App({audioApi}) {
                                       showScaleDegrees,
                                       selected:
                                         chordData.chordName === lastChord,
-                                      onMouseOver: setHighlightedChord,
+                                      onMouseOver: setHighlightedKeys,
                                     }}
                                   />
                                 ))}

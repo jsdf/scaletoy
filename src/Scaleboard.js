@@ -50,21 +50,22 @@ function atStartOfOctave(note) {
   return note[0] > 'B';
 }
 
+const highlightType = 'chord';
+
 function Scaleboard(props: {
-  highlightKeys: Array<string>;
-  startOctave: number;
-  octaves: number;
-  highlightType: string;
-  notePlayer: Object;
-  scalePitchClasses: Array<string>;
-  showScaleDegrees: boolean;
-  scaleSteps: number;
-  setOctave: (s) => void;
+  highlightKeys: Array<string>,
+  startOctave: number,
+  octaves: number,
+  notePlayer: Object,
+  scalePitchClasses: Array<string>,
+  showScaleDegrees: boolean,
+  scaleSteps: number,
+  setOctave: (s) => void,
 }) {
   const numKeys = props.scaleSteps * props.octaves;
   const keys = [];
 
-  const {highlightKeys, highlightType, notePlayer} = props;
+  const {highlightKeys, notePlayer} = props;
 
   const highlightKeysSharpified = React.useMemo(
     () => (highlightKeys ? highlightKeys.map(simplifyEnharmonics) : null),
