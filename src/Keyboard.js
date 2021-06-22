@@ -11,7 +11,7 @@ const whiteNotes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
 const notesWithSharps = new Set(['C', 'D', 'F', 'G', 'A']);
 
 const highlightTypeColors = {
-  scale: '#0055dc',
+  scale: '#0867ff',
   keys: 'orange',
 };
 

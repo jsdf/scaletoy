@@ -6,6 +6,7 @@
     "@babel/core": "7.4.3",
     "@svgr/webpack": "4.1.0",
     "@tonaljs/chord": "^3.2.1",
+    "@tonaljs/interval": "^4.5.1",
     "@tonaljs/midi": "^3.2.2",
     "@tonaljs/note": "^3.2.2",
     "@tonaljs/scale": "^3.2.1",

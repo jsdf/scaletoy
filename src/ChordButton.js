@@ -45,9 +45,7 @@ export default React.memo(function ChordButton({
       noteNames = (
         <div>
           <small>
-            {chordData.chord.intervals
-              // .map((v) => v.replace(/\D*/g, ''))
-              .join()}
+            {chordData.chord ? chordData.chord.intervals.join() : ''}
           </small>
         </div>
       );
@@ -68,7 +66,7 @@ export default React.memo(function ChordButton({
     <div
       style={{
         ...buttonStyle,
-        background: chordTypeColors[chordData.chordType],
+        background: chordTypeColors[chordData.chordType] || '#ccc',
         border: '1px solid',
         borderColor: selected ? 'rgba(0,0,0,0.2)' : 'transparent',
       }}

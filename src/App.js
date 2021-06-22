@@ -1,6 +1,8 @@
 import React from 'react';
 import {knuthShuffle} from 'knuth-shuffle';
 import * as Tonal from '@tonaljs/tonal';
+import * as Interval from '@tonaljs/interval';
+
 import * as Scale from '@tonaljs/scale';
 import * as Chord from '@tonaljs/chord';
 import * as Note from '@tonaljs/note';
@@ -18,6 +20,7 @@ import Checkbox from './Checkbox';
 import ChordButton from './ChordButton';
 import Sticky from './Sticky';
 import simplifyEnharmonics from './simplifyEnharmonics';
+import NearbyChords from './NearbyChords';
 
 const SIZE_ASC = true;
 const SHOW_HISTORY = true;
@@ -83,15 +86,15 @@ const scaleTypesPosNames = Object.keys(scaleTypesChordPatterns).reduce(
     const pattern = scaleTypesChordPatterns[scaleName];
 
     acc[scaleName] = pattern.map((scaleType, i) => {
-      const pos = romanNumerals[i];
+      const degreeRoman = romanNumerals[i];
 
       switch (scaleType) {
         case 'major':
-          return pos.toUpperCase();
+          return degreeRoman.toUpperCase();
         case 'minor':
-          return pos;
+          return degreeRoman;
         case 'diminished':
-          return pos + '\xB0';
+          return degreeRoman + '\xB0';
         default:
           throw new Error(`unknown scaleType '${scaleType}'`);
       }
@@ -103,10 +106,9 @@ const scaleTypesPosNames = Object.keys(scaleTypesChordPatterns).reduce(
 );
 
 function getScaleChords(key, scaleType) {
-  return Scale.scale(key + ' ' + scaleType).notes.map((pc, pos) =>
+  return Scale.scale(key + ' ' + scaleType).notes.map((pc, degree) =>
     getChordsBySize(
-      Scale.scaleChords(scaleTypesChordPatterns[scaleType][pos]),
-      // pc // TODO simplifyEnharmonics(pc) but without breaking other stuff
+      Scale.scaleChords(scaleTypesChordPatterns[scaleType][degree]),
       simplifyEnharmonics(pc)
     )
   );
@@ -220,44 +222,96 @@ function reifyScaleNotesWithOctave(scale, octave) {
   );
 }
 
+function makeChordData(
+  chordName,
+  chordTonic,
+  degree,
+  scaleType,
+  scalePitchClassesNotesMap,
+  scaleNotesDegreeMap,
+  startOctave
+) {
+  const chordAbstract = Chord.get(chordName);
+
+  const chord = Chord.getChord(
+    chordName.slice(chordAbstract.tonic.length),
+    chordTonic,
+    chordTonic
+  );
+  const chordNotesForOctave = getReifiedNotesForChordForScale(
+    chordName,
+    scalePitchClassesNotesMap
+  );
+
+  const rotations = [];
+  for (let rot = 0; rot < chordNotesForOctave.length; rot++) {
+    const rotChordName = chord.symbol.slice(Tonal.note(chord.tonic).pc.length);
+    const rotatedChord = Chord.getChord(
+      rotChordName,
+      chord.tonic,
+      chordNotesForOctave[rot]
+    );
+    if (rotatedChord.empty) {
+      // dunno how to invert this
+      break;
+    }
+    rotations.push({
+      chordName: chord.symbol,
+      chord: rotatedChord,
+      chordNotesForOctave: rotatedChord.intervals.map((interval) =>
+        simplifyEnharmonics(Tonal.transpose(rotatedChord.tonic, interval))
+      ),
+    });
+  }
+
+  return {
+    degree,
+    chord,
+    chordType: scaleTypesChordPatterns[scaleType][degree],
+    chordNotesForOctave,
+    pitchClasses: chord.notes,
+    chordName,
+    rotations,
+    size: chord.intervals.length * (chord.quality === 'Unknown' ? -1 : 1),
+  };
+}
 function makeScaleData(key, scaleType, octave) {
   const scale = Scale.scale(`${key} ${scaleType}`);
   const scalePitchClasses = scale.notes;
 
   const scaleNotes = reifyScaleNotesWithOctave(scale, octave);
+  const scaleNotesDegreeMap = {};
   const scalePitchClassesNotesMap = {};
-  scaleNotes.forEach((noteName) => {
+  scaleNotes.forEach((noteName, degree) => {
+    scaleNotesDegreeMap[noteName] = degree;
     scalePitchClassesNotesMap[
       simplifyEnharmonics(Tonal.note(noteName).pc)
     ] = noteName;
   });
 
-  const scalePosChords = new Map(
-    getScaleChords(key, scaleType).map((chordNames, pos) => {
-      return [
-        pos,
+  const startOctave = Tonal.note(scaleNotes[0]).oct;
 
-        chordNames.map((chordName) => {
-          const chord = Chord.get(chordName);
-          return {
-            pos,
-            chord,
-            chordType: scaleTypesChordPatterns[scaleType][pos],
-            chordNotesForOctave: getReifiedNotesForChordForScale(
-              chordName,
-              scalePitchClassesNotesMap
-            ),
+  const scaleDegreeChords = new Map(
+    getScaleChords(key, scaleType).map((chordNames, degree) => {
+      return [
+        degree,
+        chordNames.map((chordName) =>
+          makeChordData(
             chordName,
-            size:
-              chord.intervals.length * (chord.quality === 'Unknown' ? -1 : 1),
-          };
-        }),
+            scaleNotes[degree],
+            degree,
+            scaleType,
+            scalePitchClassesNotesMap,
+            scaleNotesDegreeMap,
+            startOctave
+          )
+        ),
       ];
     })
   );
 
   const sizes = new Set();
-  scalePosChords.forEach((chordDatas, pos) => {
+  scaleDegreeChords.forEach((chordDatas, degree) => {
     chordDatas.forEach((chordData) => {
       sizes.add(chordData.size);
     });
@@ -267,7 +321,7 @@ function makeScaleData(key, scaleType, octave) {
     scaleType,
     key,
     scalePitchClasses,
-    scalePosChords,
+    scaleDegreeChords,
     scaleNotes,
     sizes: Array.from(sizes).sort((a, b) => a - b),
   };
@@ -436,9 +490,9 @@ function App({audioApi}) {
         return updatedEvents;
       });
 
-      if (source !== 'history') {
+      if (source !== 'history' && source !== 'nearby') {
         setHistory((s) => s.concat(chordData));
-        setLastChord(chordData.chordName);
+        setLastChord(chordData);
       }
     },
     [setEvents, audioApi, oneShot]
@@ -608,6 +662,30 @@ function App({audioApi}) {
     </Sticky>
   );
 
+  const nearbyChordsSection = (
+    <Sticky
+      name="nearbyChordsSection"
+      onSetSticky={onSetSticky}
+      sticky={stickySection === 'nearbyChordsSection'}
+      className="background"
+    >
+      <Details summary="nearby chords" startOpen={true}>
+        <NearbyChords
+          {...{
+            scaleData,
+            playChord,
+            endChord,
+            strumming,
+            strumMode,
+            showScaleDegrees,
+            setHighlightedKeys,
+            lastChord,
+          }}
+        />
+      </Details>
+    </Sticky>
+  );
+
   const historySection = SHOW_HISTORY && (
     <div style={alignLeft}>
       <details>
@@ -692,12 +770,14 @@ function App({audioApi}) {
                     {false && <div style={{flex: 1}}>{size}</div>}
                     <br />
                     <div key={size} style={{display: 'flex'}}>
-                      {Array.from(scaleData.scalePosChords).map(
-                        ([pos, chordDatas]) => {
+                      {Array.from(scaleData.scaleDegreeChords).map(
+                        ([degree, chordDatas]) => {
                           return (
-                            <div key={pos} style={{flex: 1}}>
+                            <div key={degree} style={{flex: 1}}>
                               {sizeIndex === 0 && (
-                                <div>{scaleTypesPosNames[scaleType][pos]}</div>
+                                <div>
+                                  {scaleTypesPosNames[scaleType][degree]}
+                                </div>
                               )}
 
                               {chordDatas
@@ -719,7 +799,9 @@ function App({audioApi}) {
                                       strumMode,
                                       showScaleDegrees,
                                       selected:
-                                        chordData.chordName === lastChord,
+                                        lastChord &&
+                                        chordData.chordName ===
+                                          lastChord.chordName,
                                       onMouseOver: setHighlightedKeys,
                                     }}
                                   />
@@ -751,6 +833,7 @@ function App({audioApi}) {
       {controlsSection}
       {scaleKeyboardSection}
       {chromaticKeyboardSection}
+      {nearbyChordsSection}
       {historySection}
       {chordPaletteSection}
       {midiEventLogSection}
