@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@babel/core": "7.4.3",
+    "@babel/helper-regex": "^7.10.5",
     "@svgr/webpack": "4.1.0",
     "@tonaljs/chord": "^3.2.1",
     "@tonaljs/interval": "^4.5.1",

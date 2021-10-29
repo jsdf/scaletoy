@@ -4,10 +4,7 @@ import useQueryParam, {QUERY_PARAM_FORMATS} from './useQueryParam';
 import useLocalStorage from './useLocalStorage';
 import './App.css';
 import App from './App';
-
-const USE_SAMPLED_DX7 = Boolean(
-  new URL(document.location.href).searchParams.get('sampled')
-);
+import Synth from './Synth';
 
 function nonnull<T>(v: ?T): T {
   if (v == null) {
@@ -62,70 +59,56 @@ function Startup() {
   const [audioApi, setAudioApi] = React.useState(null);
 
   const onStart = React.useCallback(() => {
-    nonnull(document.querySelector('.dx7')).style.visibility = 'visible';
     nonnull(document.querySelector('.intro')).style.display = 'none';
 
     setStartedAudio(true);
   }, [setStartedAudio]);
 
-  React.useEffect(() => {
-    async function initSampled() {
-      const {sampledDX7} = await import('./sampledDX7');
-
-      sampledDX7().then(({dx7, actx}) => {
-        window.initDX7Shim(dx7, actx);
-      });
-    }
-    window.onDX7Init = (dx7, actx) => {
-      if (!dx7) {
-        // fall back to sampled
-        return initSampled();
-      }
-      const newAudioApi = {
-        dx7,
-        actx,
-      };
-
+  const onInitSynth = React.useCallback(
+    (newAudioApi) => {
       setAudioApi(newAudioApi);
-      if (actx.state === 'running') {
+      if (newAudioApi.actx.state === 'running') {
         onStart();
       }
-    };
-    if (USE_SAMPLED_DX7) {
-      initSampled();
-    } else {
-      window.initDX7(process.env.PUBLIC_URL);
-    }
-  }, []);
+    },
+    [onStart]
+  );
+  const synth = <Synth onLoaded={onInitSynth} />;
 
   const Route = useRouting();
   if (audioApi && startedAudio) {
     return (
-      <React.Suspense fallback={<div>loading...</div>}>
-        <div>
-          {<Route {...{audioApi}} />}
-          <Theme />
-        </div>
-      </React.Suspense>
+      <>
+        {synth}
+        <React.Suspense fallback={<div>loading...</div>}>
+          <div>
+            <Route {...{audioApi}} />
+            <Theme />
+          </div>
+        </React.Suspense>
+      </>
     );
   }
 
   return (
-    <div className="App">
-      {audioApi ? (
-        <button
-          style={{fontSize: 42, borderRadius: 9, cursor: 'pointer'}}
-          onClick={() => {
-            audioApi.actx.resume();
-            onStart();
-          }}
-        >
-          start
-        </button>
-      ) : (
-        'loading...'
-      )}
-    </div>
+    <>
+      {synth}
+      <div className="App">
+        {audioApi ? (
+          <button
+            style={{fontSize: 42, borderRadius: 9, cursor: 'pointer'}}
+            onClick={() => {
+              audioApi.actx.resume();
+              onStart();
+            }}
+          >
+            start
+          </button>
+        ) : (
+          'loading...'
+        )}
+      </div>
+    </>
   );
 }
 
