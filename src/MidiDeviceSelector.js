@@ -9,7 +9,7 @@ export default function MidiDeviceSelector({type, onChange, selectedPort}) {
     if (!navigator.requestMIDIAccess) {
       return;
     }
-    navigator.requestMIDIAccess().then(access => {
+    navigator.requestMIDIAccess().then((access) => {
       setAvailablePorts(Array.from(access[accessType].values()));
 
       access.onstatechange = function(e) {
@@ -22,7 +22,7 @@ export default function MidiDeviceSelector({type, onChange, selectedPort}) {
     <label>
       midi {type == 'input' ? 'in' : 'out'}:{' '}
       <select
-        onChange={e => {
+        onChange={(e) => {
           onChange(availablePorts[parseInt(e.currentTarget.value)]);
         }}
         value={availablePorts.indexOf(selectedPort)}
