@@ -245,11 +245,19 @@ function makeChordData(
 
   const rotations = [];
   for (let rot = 0; rot < chordNotesForOctave.length; rot++) {
+    const maxInterval = Interval.num(
+      chord.intervals[chord.intervals.length - 1]
+    );
+
+    // this method will not correctly invert larger chords
+    if (maxInterval >= 7) break;
+    const rotationTonic = chord.tonic;
+
     const rotChordName = chord.symbol.slice(Tonal.note(chord.tonic).pc.length);
     const rotatedChord = Chord.getChord(
       rotChordName,
-      chord.tonic,
-      chordNotesForOctave[rot]
+      rotationTonic,
+      chordNotesForOctave[rot] // root
     );
     if (rotatedChord.empty) {
       // dunno how to invert this
