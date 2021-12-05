@@ -3,8 +3,8 @@ import Sampler from 'tone/Tone/instrument/Sampler';
 import Frequency from 'tone/Tone/type/Frequency';
 
 function createDX7() {
-  return new Promise(resolve => {
-    const sampler = new Tone.Sampler(
+  return new Promise((resolve) => {
+    const sampler = new Sampler(
       {
         C3: require('./samples/dexed-epiano-C2.m4a'),
         'D#3': require('./samples/dexed-epiano-Ds2.m4a'),
@@ -47,14 +47,8 @@ function createDX7() {
   });
 }
 
-function getContext() {
-  return new Promise(resolve => {
-    Tone.getContext(resolve);
-  });
-}
-
-export async function sampledDX7() {
-  const actx = await getContext();
+export async function sampledDX7(actx) {
+  Tone.setContext(actx);
   const dx7 = await createDX7();
   return {
     actx,

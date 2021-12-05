@@ -4,7 +4,7 @@ import useQueryParam, {QUERY_PARAM_FORMATS} from './useQueryParam';
 import useLocalStorage from './useLocalStorage';
 import './App.css';
 import App from './App';
-import Synth from './Synth';
+import {Synth, loadSynth} from './Synth';
 
 function nonnull<T>(v: ?T): T {
   if (v == null) {
@@ -54,6 +54,8 @@ function useRouting() {
   }
 }
 
+let actx = new AudioContext();
+
 function Startup() {
   const [startedAudio, setStartedAudio] = React.useState(false);
   const [audioApi, setAudioApi] = React.useState(null);
@@ -64,16 +66,17 @@ function Startup() {
     setStartedAudio(true);
   }, [setStartedAudio]);
 
-  const onInitSynth = React.useCallback(
-    (newAudioApi) => {
-      setAudioApi(newAudioApi);
-      if (newAudioApi.actx.state === 'running') {
+  React.useEffect(() => {
+    loadSynth(actx).then((audioApi) => {
+      setAudioApi(audioApi);
+
+      if (audioApi.actx.state === 'running') {
         onStart();
       }
-    },
-    [onStart]
-  );
-  const synth = <Synth onLoaded={onInitSynth} />;
+    });
+  }, [onStart]);
+
+  const synth = <Synth audioApi={audioApi} />;
 
   const Route = useRouting();
   if (audioApi && startedAudio) {
@@ -92,7 +95,6 @@ function Startup() {
 
   return (
     <>
-      {synth}
       <div className="App">
         {audioApi ? (
           <button

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {useRef, useEffect, useState, useCallback} from 'react';
+import {useRef, useEffect, useState} from 'react';
 
 import MidiDeviceSelector from './MidiDeviceSelector';
 
@@ -72,7 +72,7 @@ function loadBank(filename) {
   });
 }
 
-function initDX7(done) {
+function initDX7(actx, done) {
   const errHandler = (e) => {
     console.error(e);
     debugger;
@@ -82,8 +82,6 @@ function initDX7(done) {
     publicUrl + '/wam/wamsdk/wam-controller.js',
     publicUrl + '/wam/dx7/dx7-awn.js',
   ];
-
-  var actx = new AudioContext();
 
   /* global AWPF, DX7 */
   AWPF.polyfill(actx, controllerScripts)
@@ -110,8 +108,27 @@ function initDX7(done) {
     .catch(errHandler);
 }
 
-export default function Synth({onLoaded}) {
-  const audioApiRef = useRef(null);
+async function loadSampled(actx) {
+  const {sampledDX7} = await import('./sampledDX7');
+  return {sampled: true, ...(await sampledDX7(actx))};
+}
+export async function loadSynth(actx) {
+  if (USE_SAMPLED_DX7) {
+    return await loadSampled(actx);
+  } else {
+    const audioApi = await new Promise((resolve) =>
+      initDX7(actx, (dx7, actx) => resolve({dx7, actx}))
+    );
+    if (!audioApi.dx7) {
+      // fall back to sampled
+      return await loadSampled(actx);
+    } else {
+      return audioApi;
+    }
+  }
+}
+
+export function Synth({audioApi}) {
   const [midiIn, setMidiIn] = React.useState(null);
 
   const [bank, setBank] = useState(banklist[0]);
@@ -148,54 +165,33 @@ export default function Synth({onLoaded}) {
       return;
     }
     midiIn.onmidimessage = (message) => {
-      if (audioApiRef.current) {
-        audioApiRef.current.dx7.onMidi(message.data);
+      if (audioApi) {
+        audioApi.dx7.onMidi(message.data);
       }
     };
     return () => {
       midiIn.onmidimessage = null;
     };
-  }, [midiIn]);
+  }, [midiIn, audioApi]);
 
   useEffect(() => {
-    if (!audioApiRef.current) {
-      function done(audioApi) {
-        if (!mountedRef.current) return;
-        audioApiRef.current = audioApi;
-        changeBankRef.current(banklist[0]);
-        onLoaded(audioApi);
-      }
-      async function loadSampled() {
-        const {sampledDX7} = await import('./sampledDX7');
-        const audioApi = await sampledDX7();
-        done(audioApi);
-      }
-      if (USE_SAMPLED_DX7) {
-        loadSampled();
-      } else {
-        initDX7((dx7, actx) => {
-          if (!dx7) {
-            // fall back to sampled
-            loadSampled();
-          } else {
-            done({dx7, actx});
-          }
-        });
-      }
-    } else {
-      onLoaded(audioApiRef.current);
-    }
-  }, [onLoaded]);
+    if (!mountedRef.current) return;
+    changeBankRef.current(banklist[0]);
+  }, [audioApi]);
 
   useEffect(() => {
     if (!patch || !bankData) {
       return;
     }
     const newPatchData = bankData.find((p) => p.name === patch) || bankData[0];
-    if (newPatchData && audioApiRef.current) {
-      audioApiRef.current.dx7.setPatch(newPatchData.voice);
+    if (newPatchData && audioApi && audioApi.dx7.setPatch) {
+      audioApi.dx7.setPatch(newPatchData.voice);
     }
-  }, [patch, bankData]);
+  }, [patch, bankData, audioApi]);
+
+  if (audioApi.sampled) {
+    return null
+  }
 
   return (
     <div className="dx7">
