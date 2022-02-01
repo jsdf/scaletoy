@@ -190,7 +190,7 @@ export function Synth({audioApi}) {
   }, [patch, bankData, audioApi]);
 
   if (audioApi.sampled) {
-    return null
+    return null;
   }
 
   return (
