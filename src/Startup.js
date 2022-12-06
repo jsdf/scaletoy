@@ -48,6 +48,8 @@ function useRouting() {
   switch (route) {
     case 'exploder':
       return React.lazy(() => import('./MidiExploder'));
+    case 'textplayer':
+      return React.lazy(() => import('./TextPlayer'));
     case 'chordpalette':
     default:
       return App;

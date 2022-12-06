@@ -98,6 +98,16 @@ select {
   cursor: pointer;
 }
 
+.dark-mode textarea,
+.dark-mode input[type='text'] {
+  background: #222;
+  color: #eee;
+}
+.dark-mode input[type='range'] {
+  background: #222;
+  color: #eee;
+}
+
 input[type='checkbox'] {
   vertical-align: middle;
 }
