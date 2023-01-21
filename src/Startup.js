@@ -3,10 +3,10 @@ import React from 'react';
 import useQueryParam, {QUERY_PARAM_FORMATS} from './useQueryParam';
 import useLocalStorage from './useLocalStorage';
 import './App.css';
-import App from './App';
+import ChordPalette from './ChordPalette';
 import {Synth, loadSynth} from './Synth';
 
-function nonnull<T>(v: ?T): T {
+function nonnull(v) {
   if (v == null) {
     throw new Error('unexpected null');
   }
@@ -52,7 +52,7 @@ function useRouting() {
       return React.lazy(() => import('./TextPlayer'));
     case 'chordpalette':
     default:
-      return App;
+      return ChordPalette;
   }
 }
 
