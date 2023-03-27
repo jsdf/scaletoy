@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" class="light-mode">
+
+<head>
+  <meta charset="utf-8" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#000000" />
+  <!--
+      manifest.json provides metadata used when your web app is installed on a
+      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
+    -->
+  <link rel="manifest" href="/manifest.json" />
+  <title>Scaletoy</title>
+</head>
+
+<body>
+  <script type="module" src="/src/main.tsx"></script>
+  <link rel="stylesheet" href="/wam/dx7/gui/dx7.css" />
+  <div class="intro" style="text-align: center; margin: 32px; font-size: 1.2em">
+    <h1 style="font-size: 2em">scaletoy</h1>
+    <p>
+      scaletoy is a tool for writing music and exploring the relationship
+      between chords and scales.
+    </p>
+    <p>
+      it can also play chords and scales via midi to your music software and
+      gear, or via an in-browser synth.
+    </p>
+    <p>made by <a href="https://jamesfriend.com.au/">james friend</a></p>
+  </div>
+
+  <noscript>You need to enable JavaScript to run this app.</noscript>
+  <div id="unsupported">this browser is not supported</div>
+
+  <div id="root"></div>
+</body>
+
+</html>

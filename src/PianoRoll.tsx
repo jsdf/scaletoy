@@ -67,8 +67,8 @@ function PianoRollTrack({
   scaleNotes,
 }) {
   const selectionRef = React.useRef({
-    start: {x: 0, y: 0},
-    end: {x: 0, y: 0},
+    start: { x: 0, y: 0 },
+    end: { x: 0, y: 0 },
     dragging: false,
   });
 
@@ -144,7 +144,7 @@ function PianoRollTrack({
   }, [selectNotes]);
 
   return (
-    <div style={{overflowX: 'scroll'}}>
+    <div style={{ overflowX: 'scroll' }}>
       <div
         onMouseDown={onMouseDown}
         onMouseMove={onMouseMove}
@@ -172,8 +172,8 @@ function PianoRollTrack({
                 background: scaleNotes.has(note)
                   ? 'rgba(199,200,0,1)'
                   : (Tonal.note(noteName).acc === ''
-                                    ? '#555'
-                                    : '#333'),
+                    ? '#555'
+                    : '#333'),
                 borderTop: 'solid #222 1px',
                 overflow: 'hidden',
               }}
@@ -219,26 +219,26 @@ function PianoRollTrack({
 export default function Piano(props: {
   midi: Object,
   selectedNotes: Set<Object>,
-  setSelectedNotes: (Set<Object>) => void,
+  setSelectedNotes: (notes: Set<Object>) => void,
   zoom: number,
   scaleNotes: Set<string>,
 }) {
-  const {midi, selectedNotes, setSelectedNotes, zoom, scaleNotes} = props;
+  const { midi, selectedNotes, setSelectedNotes, zoom, scaleNotes } = props;
   const trackExtents = React.useMemo(() => {
     return midi.tracks.map((t) => {
       return t.notes.length === 0
-        ? {minNote: 0, maxNote: 12, maxTicks: 0}
+        ? { minNote: 0, maxNote: 12, maxTicks: 0 }
         : t.notes.reduce(
-            (acc, ev) => {
-              const minNote = Math.min(acc.minNote, ev.midi);
-              return {
-                minNote,
-                maxNote: Math.max(acc.maxNote, ev.midi, minNote + 12),
-                maxTicks: Math.max(acc.maxTicks, ev.ticks + ev.durationTicks),
-              };
-            },
-            {minNote: 127, maxNote: 0, maxTicks: 0}
-          );
+          (acc, ev) => {
+            const minNote = Math.min(acc.minNote, ev.midi);
+            return {
+              minNote,
+              maxNote: Math.max(acc.maxNote, ev.midi, minNote + 12),
+              maxTicks: Math.max(acc.maxTicks, ev.ticks + ev.durationTicks),
+            };
+          },
+          { minNote: 127, maxNote: 0, maxTicks: 0 }
+        );
     });
   }, [midi.tracks]);
 
@@ -251,7 +251,7 @@ export default function Piano(props: {
   }, [trackExtents, midi.header.ppq]);
 
   return (
-    <div style={{textAlign: 'left'}}>
+    <div style={{ textAlign: 'left' }}>
       {midi.tracks.map((track, trackIdx) => {
         const extents = trackExtents[trackIdx];
         const midiRange = extents.maxNote - extents.minNote;

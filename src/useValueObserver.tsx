@@ -1,8 +1,8 @@
 import React from 'react';
 
-export default function useValueObserver(
-  currentValue,
-  onChange: (value, prevValue) => void
+export default function useValueObserver<T>(
+  currentValue: T,
+  onChange: (value: T, prevValue: T) => void
 ) {
   const valueRef = React.useRef(currentValue);
 

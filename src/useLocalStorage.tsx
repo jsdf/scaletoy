@@ -1,6 +1,9 @@
-import {useState} from 'react';
+import { useState } from 'react';
 
-export default function useLocalStorage(baseKey, initialValue) {
+type Updater<T> = T | ((toUpdate: T) => T);
+type Setter<T> = (updater: Updater<T>) => void;
+
+export default function useLocalStorage<T>(baseKey: string, initialValue: T): [T, Setter<T>] {
   const key = `scaletoy-${baseKey}`;
   // State to store our value
   // Pass initial state function to useState so logic is only executed once
@@ -19,7 +22,7 @@ export default function useLocalStorage(baseKey, initialValue) {
 
   // Return a wrapped version of useState's setter function that ...
   // ... persists the new value to localStorage.
-  const setValue = value => {
+  const setValue = (value: Updater<T>) => {
     try {
       // Allow value to be a function so we have same API as useState
       const valueToStore =

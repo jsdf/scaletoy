@@ -1,12 +1,12 @@
-// @flow
 import React from 'react';
-import useQueryParam, {QUERY_PARAM_FORMATS} from './useQueryParam';
+import useQueryParam, { QUERY_PARAM_FORMATS } from './useQueryParam';
 import useLocalStorage from './useLocalStorage';
 import './App.css';
 import ChordPalette from './ChordPalette';
-import {loadSynth} from './Synth';
+import { loadSynth } from './Synth';
+import { AudioAPI } from './AudioAPI';
 
-function nonnull(v) {
+function nonnull<T>(v: T | null): T {
   if (v == null) {
     throw new Error('unexpected null');
   }
@@ -25,7 +25,7 @@ function Theme() {
   }, [darkMode]);
 
   return (
-    <div style={{position: 'absolute', top: 0, right: 0}}>
+    <div style={{ position: 'absolute', top: 0, right: 0 }}>
       <label>
         dark mode:{' '}
         <input
@@ -38,7 +38,7 @@ function Theme() {
   );
 }
 
-function useRouting() {
+function useRouting(): React.ComponentType<{ audioApi: AudioAPI }> {
   const [route] = useQueryParam(
     'route',
     'chordpalette',
@@ -62,10 +62,10 @@ let actx = new AudioContext();
 
 function Startup() {
   const [startedAudio, setStartedAudio] = React.useState(false);
-  const [audioApi, setAudioApi] = React.useState(null);
+  const [audioApi, setAudioApi] = React.useState<AudioAPI | null>(null);
 
   const onStart = React.useCallback(() => {
-    nonnull(document.querySelector('.intro')).style.display = 'none';
+    (nonnull(document.querySelector('.intro')) as HTMLDivElement).style.display = 'none';
 
     setStartedAudio(true);
   }, [setStartedAudio]);
@@ -86,7 +86,7 @@ function Startup() {
       <>
         <React.Suspense fallback={<div>loading...</div>}>
           <div>
-            <Route {...{audioApi}} />
+            <Route {...{ audioApi }} />
             <Theme />
           </div>
         </React.Suspense>
@@ -99,7 +99,7 @@ function Startup() {
       <div className="App">
         {audioApi ? (
           <button
-            style={{fontSize: 42, borderRadius: 9, cursor: 'pointer'}}
+            style={{ fontSize: 42, borderRadius: 9, cursor: 'pointer' }}
             onClick={() => {
               audioApi.actx.resume();
               onStart();

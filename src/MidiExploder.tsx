@@ -8,14 +8,15 @@ import * as Midi from '@tonaljs/midi';
 import * as Chord from '@tonaljs/chord';
 import * as ScaleDictionary from '@tonaljs/scale-dictionary';
 import useLocalStorage from './useLocalStorage';
-import useQueryParam, {QUERY_PARAM_FORMATS} from './useQueryParam';
+import useQueryParam, { QUERY_PARAM_FORMATS } from './useQueryParam';
 import useValueObserver from './useValueObserver';
 import Keyboard from './Keyboard';
 import PianoRoll from './PianoRoll';
 import Details from './Details';
 import simplifyEnharmonics from './simplifyEnharmonics';
 import Checkbox from './Checkbox';
-import {Synth} from './Synth';
+import { Synth } from './Synth';
+import { AudioAPI } from './AudioAPI';
 
 const keys = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B'];
 
@@ -35,7 +36,7 @@ const NOTE_ON = 0x90;
 const NOTE_OFF = 0x80;
 const velocityMidi = 80;
 
-function SelectionInfo({scaleData, selectedNotes, notePlayer}) {
+function SelectionInfo({ scaleData, selectedNotes, notePlayer }) {
   const selectedNotesSet = [
     ...new Set([...selectedNotes].map((note) => Tonal.note(note.name).pc)),
   ].map(simplifyEnharmonics);
@@ -100,7 +101,7 @@ function makeScaleData(key, scaleType, octave) {
       ),
     }));
 
-  return {scale, scaleNotes, key, keyScales};
+  return { scale, scaleNotes, key, keyScales };
 }
 
 function usePersistedMidiFile() {
@@ -131,11 +132,9 @@ function usePersistedMidiFile() {
 }
 
 export default function MidiExploder(props: {
-  audioApi: {
-    dx7: Object,
-  },
+  audioApi: AudioAPI,
 }) {
-  const {audioApi} = props;
+  const { audioApi } = props;
   const [midiFile, setMidiFile] = usePersistedMidiFile();
   const [key, setKey] = useQueryParam('key', 'C', QUERY_PARAM_FORMATS.string);
   const [scaleType, setScaleType] = useQueryParam(
@@ -174,7 +173,7 @@ export default function MidiExploder(props: {
   const [highlightedKeys, setHighlightedKeys] = React.useState(null);
 
   const setHighlightedScale = React.useCallback(() => {
-    setHighlightedKeys({keys: scaleData.scaleNotes, type: 'scale'});
+    setHighlightedKeys({ keys: scaleData.scaleNotes, type: 'scale' });
   }, [scaleData]);
 
   useValueObserver(scaleData, setHighlightedScale);
@@ -183,7 +182,7 @@ export default function MidiExploder(props: {
     if (audioApi.dx7) {
       return (message) => audioApi.dx7.onMidi(message);
     }
-    return (message) => {};
+    return (message) => { };
   }, [audioApi]);
 
   const notePlayer = React.useMemo(() => {
@@ -223,7 +222,7 @@ export default function MidiExploder(props: {
 
   return (
     <div className="App">
-      <Synth />
+      <Synth audioApi={audioApi} />
       <div
         style={{
           display: 'flex',
@@ -302,13 +301,13 @@ export default function MidiExploder(props: {
         </div>
       </div>
 
-      <details open={false} style={{textAlign: 'left'}}>
+      <details open={false} style={{ textAlign: 'left' }}>
         <summary>JSON</summary>
         <pre>{midiFile && JSON.stringify(midiFile.toJSON(), null, 2)}</pre>
       </details>
       {midiFile != null && (
-        <div style={{display: 'flex'}}>
-          <div style={{overflowY: 'auto', width: '66%'}}>
+        <div style={{ display: 'flex' }}>
+          <div style={{ overflowY: 'auto', width: '66%' }}>
             <PianoRoll
               midi={midiFile}
               {...{
@@ -322,8 +321,8 @@ export default function MidiExploder(props: {
             />
           </div>
 
-          <div style={{width: '33%', overflowY: 'auto'}}>
-            <SelectionInfo {...{scaleData, selectedNotes, notePlayer}} />
+          <div style={{ width: '33%', overflowY: 'auto' }}>
+            <SelectionInfo {...{ scaleData, selectedNotes, notePlayer }} />
           </div>
         </div>
       )}

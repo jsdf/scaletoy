@@ -1,16 +1,19 @@
-import React from 'react';
-import {useState, useEffect} from 'react';
+import React, { useMemo } from 'react';
+import { useState, useEffect } from 'react';
 
 import * as Tonal from '@tonaljs/tonal';
 
 import MidiDeviceSelector from './MidiDeviceSelector';
-import {Synth} from './Synth';
-import {getMessageType} from './midiparse';
+import { Synth } from './Synth';
+import { getMessageType } from './midiparse';
+import { AudioAPI } from './AudioAPI';
+import useLocalStorage from './useLocalStorage';
+import useValueObserver from './useValueObserver';
 
 // Define a function that takes a list of notes and returns the detected chord
-function detectChord(notes) {
+function detectChord(notes: Array<string>) {
   // Convert the notes to pitch classes (C, D, E, etc.)
-  const pitchClasses = notes.map((note) => Tonal.Note.pc(note));
+  const pitchClasses = notes.map((note) => Tonal.Note.pitchClass(note));
 
   // Use the `Chord.detect` function to detect the chord
   const detectedChord = Tonal.Chord.detect(pitchClasses);
@@ -19,11 +22,16 @@ function detectChord(notes) {
   return detectedChord;
 }
 
-export default function ChordRecogniser({audioApi}) {
-  const [midiIn, setMidiIn] = useState(null);
+export default function ChordRecogniser({ audioApi }: { audioApi: AudioAPI }) {
+  const [midiIn, setMidiIn] = useState<WebMidi.MIDIInput | null>(null);
+  const [lastSelectedPortID, setLastSelectedPortID] = useLocalStorage<string | null>('ChordRecogniser-lastSelectedPortID', null)
+  useValueObserver(midiIn, (value, prevValue) => {
+    setLastSelectedPortID(value?.id ?? null)
+  })
 
-  const [chord, setChord] = useState(null);
-  const [pressedKeys, setPressedKeys] = useState(() => []);
+
+  const [pressedKeys, setPressedKeys] = useState<string[]>(() => []);
+  const chord = useMemo(() => detectChord(pressedKeys), [pressedKeys])
 
   useEffect(() => {
     if (midiIn == null) {
@@ -31,7 +39,7 @@ export default function ChordRecogniser({audioApi}) {
     }
     midiIn.onmidimessage = (message) => {
       if (audioApi) {
-        audioApi.dx7.onMidi(message.data);
+        audioApi.dx7?.onMidi(message.data);
       }
 
       const msgType = getMessageType(message.data[0]);
@@ -53,18 +61,21 @@ export default function ChordRecogniser({audioApi}) {
       }
     };
     return () => {
-      midiIn.onmidimessage = null;
+      if (midiIn) {
+        midiIn.onmidimessage = () => { };
+      }
     };
   }, [midiIn, audioApi]);
 
   return (
     <div>
-      <Synth />
+      <Synth audioApi={audioApi} />
       <div>
         <MidiDeviceSelector
           type="input"
           selectedPort={midiIn}
           onChange={setMidiIn}
+          initialPortID={lastSelectedPortID}
         />
       </div>
       <div>notes: {pressedKeys.join(' ')}</div>
