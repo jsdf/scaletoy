@@ -4,7 +4,7 @@ import useQueryParam, {QUERY_PARAM_FORMATS} from './useQueryParam';
 import useLocalStorage from './useLocalStorage';
 import './App.css';
 import ChordPalette from './ChordPalette';
-import {Synth, loadSynth} from './Synth';
+import {loadSynth} from './Synth';
 
 function nonnull(v) {
   if (v == null) {
@@ -50,6 +50,8 @@ function useRouting() {
       return React.lazy(() => import('./MidiExploder'));
     case 'textplayer':
       return React.lazy(() => import('./TextPlayer'));
+    case 'chordrecogniser':
+      return React.lazy(() => import('./ChordRecogniser'));
     case 'chordpalette':
     default:
       return ChordPalette;
@@ -78,13 +80,10 @@ function Startup() {
     });
   }, [onStart]);
 
-  const synth = <Synth audioApi={audioApi} />;
-
   const Route = useRouting();
   if (audioApi && startedAudio) {
     return (
       <>
-        {synth}
         <React.Suspense fallback={<div>loading...</div>}>
           <div>
             <Route {...{audioApi}} />

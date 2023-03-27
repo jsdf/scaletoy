@@ -1,58 +1,9 @@
 import React from 'react';
-import * as ToneJSMidi from '@tonejs/midi';
-import * as Tonal from '@tonaljs/tonal';
-import * as Scale from '@tonaljs/scale';
-import * as Note from '@tonaljs/note';
-import * as Midi from '@tonaljs/midi';
-import * as Chord from '@tonaljs/chord';
-import * as ScaleDictionary from '@tonaljs/scale-dictionary';
 import useLocalStorage from './useLocalStorage';
-import useQueryParam, {QUERY_PARAM_FORMATS} from './useQueryParam';
-import useValueObserver from './useValueObserver';
-import Keyboard from './Keyboard';
-import PianoRoll from './PianoRoll';
-import Details from './Details';
-import simplifyEnharmonics from './simplifyEnharmonics';
-import Checkbox from './Checkbox';
+import {Synth} from './Synth';
 
-const NOTE_ON = 0x90;
-const NOTE_OFF = 0x80;
-const velocityMidi = 80;
+import {usePlayerTick, usePlayNotes} from './player';
 
-function addEvents(events, newEvents) {
-  const updatedEvents = events.concat(newEvents);
-  updatedEvents.sort((a, b) => a.time - b.time);
-  return updatedEvents;
-}
-
-function onTick(events, audioApi, onMidi) {
-  let i = 0;
-  for (; i < events.length; i++) {
-    const nextEvent = events[i];
-    if (nextEvent.time > audioApi.actx.currentTime) {
-      break;
-    }
-
-    onMidi(nextEvent.message);
-  }
-
-  return i === 0 ? events : events.slice(i);
-}
-function playNoteOnOff(events, noteName, start, end) {
-  const noteMidi = Tonal.note(noteName).midi;
-
-  let updatedEvents = events;
-  return addEvents(updatedEvents, [
-    {
-      message: [NOTE_ON, noteMidi, velocityMidi],
-      time: start,
-    },
-    {
-      message: [NOTE_OFF, noteMidi, velocityMidi],
-      time: end,
-    },
-  ]);
-}
 export default function TextPlayer({audioApi}) {
   const [textContent, setTextContent] = useLocalStorage(
     'textplayer-content',
@@ -62,6 +13,7 @@ export default function TextPlayer({audioApi}) {
 
   const [events, setEvents] = React.useState([]);
 
+  // hardcoded to use dx7 for now
   const onMidi = React.useMemo(() => {
     if (audioApi.dx7) {
       return (message) => audioApi.dx7.onMidi(message);
@@ -69,47 +21,8 @@ export default function TextPlayer({audioApi}) {
     return (message) => {};
   }, [audioApi]);
 
-  React.useEffect(() => {
-    // start event-consuming interval
-    const id = setInterval(() => {
-      setEvents((events) => {
-        const updated = onTick(events, audioApi, onMidi);
-        // onTick can only remove events
-        if (updated.length === events.length) {
-          return events;
-        }
-        return updated;
-      });
-    }, 1);
-    return () => {
-      clearInterval(id);
-    };
-  }, [onMidi, audioApi]);
-
-  const playNotes = React.useCallback(
-    (notes) => {
-      console.log(notes);
-      setEvents((events) => {
-        let updatedEvents = events;
-        const currentTime = audioApi.actx.currentTime;
-        const beatDurationSeconds = (1 / bpm) * 60;
-        let lastStartTimeOffset = 0;
-        notes.forEach((noteName) => {
-          lastStartTimeOffset += beatDurationSeconds;
-
-          updatedEvents = playNoteOnOff(
-            updatedEvents,
-            noteName,
-            currentTime + lastStartTimeOffset,
-            currentTime + lastStartTimeOffset + beatDurationSeconds
-          );
-        });
-
-        return updatedEvents;
-      });
-    },
-    [setEvents, audioApi, bpm]
-  );
+  usePlayerTick(audioApi, onMidi, setEvents);
+  const playNotes = usePlayNotes(setEvents, audioApi, bpm);
 
   function handleClick() {
     const notes = textContent
@@ -131,6 +44,7 @@ export default function TextPlayer({audioApi}) {
 
   return (
     <div>
+      <Synth />
       <div>
         <textarea
           rows={10}

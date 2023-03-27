@@ -15,13 +15,15 @@ const highlightTypeColors = {
   keys: 'orange',
 };
 
-function Keyboard(props: {
+function Keyboard(
+  props /*: {
   highlightKeys: Array<string>,
   highlightScale: Array<string>,
   startOctave: number,
   octaves: number,
   notePlayer: Object,
-}) {
+}*/
+) {
   const numKeys = whiteNotes.length * props.octaves;
   const keys = [];
 

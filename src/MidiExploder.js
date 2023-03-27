@@ -15,6 +15,7 @@ import PianoRoll from './PianoRoll';
 import Details from './Details';
 import simplifyEnharmonics from './simplifyEnharmonics';
 import Checkbox from './Checkbox';
+import {Synth} from './Synth';
 
 const keys = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B'];
 
@@ -222,6 +223,7 @@ export default function MidiExploder(props: {
 
   return (
     <div className="App">
+      <Synth />
       <div
         style={{
           display: 'flex',

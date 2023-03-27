@@ -128,7 +128,7 @@ export async function loadSynth(actx) {
   }
 }
 
-export function Synth({audioApi}) {
+export function Synth({audioApi, connectToMidiIn}) {
   const [midiIn, setMidiIn] = React.useState(null);
 
   const [bank, setBank] = useState(banklist[0]);
@@ -219,13 +219,15 @@ export function Synth({audioApi}) {
                 />
               </div>
 
-              <div className="control">
-                <MidiDeviceSelector
-                  type="input"
-                  selectedPort={midiIn}
-                  onChange={setMidiIn}
-                />
-              </div>
+              {connectToMidiIn && (
+                <div className="control">
+                  <MidiDeviceSelector
+                    type="input"
+                    selectedPort={midiIn}
+                    onChange={setMidiIn}
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>

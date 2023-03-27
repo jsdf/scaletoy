@@ -21,6 +21,7 @@ import ChordButton from './ChordButton';
 import Sticky from './Sticky';
 import simplifyEnharmonics from './simplifyEnharmonics';
 import NearbyChords from './NearbyChords';
+import {Synth} from './Synth';
 
 const SIZE_ASC = true;
 const SHOW_HISTORY = true;
@@ -838,7 +839,7 @@ function App({audioApi}) {
 
   return (
     <div className="App" style={alignLeft}>
-      {controlsSection}
+      <Synth audioApi={audioApi} connectToMidiIn />;{controlsSection}
       {scaleKeyboardSection}
       {chromaticKeyboardSection}
       {nearbyChordsSection}
