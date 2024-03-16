@@ -1,23 +1,23 @@
 export default {
   container: {
-    textAlign: 'center',
+    textAlign: "center",
   },
   keyboard: {
-    display: 'inline-block',
-    position: 'relative',
+    display: "inline-block",
+    position: "relative",
     height: 70,
     marginTop: 16,
     marginBottom: 20,
-    cursor: 'pointer',
+    cursor: "pointer",
   },
   whiteKey: {
-    position: 'absolute',
+    position: "absolute",
     borderBottomLeftRadius: 4,
     borderBottomRightRadius: 4,
     width: 20,
     height: 70,
-    background: 'white',
-    border: 'solid 1px black',
+    background: "white",
+    border: "solid 1px black",
     zIndex: 0,
   },
   noteLabel: {
@@ -25,20 +25,22 @@ export default {
     marginTop: 70,
   },
   highlighted: {
-    background: 'orange',
+    background: "orange",
   },
   blackKey: {
-    position: 'absolute',
+    position: "absolute",
     borderBottomLeftRadius: 3,
     borderBottomRightRadius: 3,
     width: 9,
     height: 50,
-    background: '#000',
-    border: 'solid 1px black',
+    background: "#000",
+    border: "solid 1px black",
 
     zIndex: 1,
   },
   pressed: {
-    background: '#7f4af9',
+    background: "#7f4af9",
   },
+} as {
+  [key: string]: React.CSSProperties;
 };
