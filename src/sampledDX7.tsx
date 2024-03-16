@@ -1,8 +1,9 @@
 import Tone from 'tone/Tone/core/Tone';
 import Sampler from 'tone/Tone/instrument/Sampler';
 import Frequency from 'tone/Tone/type/Frequency';
+import { Instrument } from './AudioAPI';
 
-function createDX7() {
+function createDX7(): Promise<Instrument> {
   return new Promise((resolve) => {
     const sampler = new Sampler(
       {
@@ -11,17 +12,18 @@ function createDX7() {
         'F#3': require('./samples/dexed-epiano-Fs2.m4a'),
         A3: require('./samples/dexed-epiano-A2.m4a'),
       },
-      function() {
+      function () {
         console.log('samples loaded');
       }
     ).toMaster();
 
-    const dx7 = {
-      connect(dest) {
-        sampler.connect(dest);
+    const dx7: Instrument = {
+      connect(destinationNode: AudioNode, output?: number, input?: number): AudioNode {
+        sampler.connect(destinationNode);
+        return destinationNode;
       },
-      disconnect(dest) {
-        sampler.disconnect(dest);
+      disconnect(destinationNode?: AudioNode) {
+        sampler.disconnect(destinationNode);
       },
       onMidi([type, note, velo]) {
         switch (type) {
@@ -41,17 +43,17 @@ function createDX7() {
             break;
         }
       },
+      setPatch(patch) {
+        // not implemented
+      },
     };
 
     resolve(dx7);
   });
 }
 
-export async function sampledDX7(actx) {
+export async function sampledDX7(actx: AudioContext): Promise<Instrument> {
   Tone.setContext(actx);
   const dx7 = await createDX7();
-  return {
-    actx,
-    dx7,
-  };
+  return dx7;
 }

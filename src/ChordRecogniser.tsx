@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import * as Tonal from '@tonaljs/tonal';
 
 import MidiDeviceSelector from './MidiDeviceSelector';
-import { Synth } from './Synth';
+import { loadSynth, loadSynthInstance, Synth, useSynthLayer } from './Synth';
 import { getMessageType } from './midiparse';
 import { AudioAPI } from './AudioAPI';
 import useLocalStorage from './useLocalStorage';
@@ -33,6 +33,8 @@ export default function ChordRecogniser({ audioApi }: { audioApi: AudioAPI }) {
   const [pressedKeys, setPressedKeys] = useState<string[]>(() => []);
   const chord = useMemo(() => detectChord(pressedKeys), [pressedKeys])
 
+  const layer2AudioApi = useSynthLayer(audioApi.actx)
+
   useEffect(() => {
     if (midiIn == null) {
       return;
@@ -40,6 +42,9 @@ export default function ChordRecogniser({ audioApi }: { audioApi: AudioAPI }) {
     midiIn.onmidimessage = (message) => {
       if (audioApi) {
         audioApi.dx7?.onMidi(message.data);
+      }
+      if (layer2AudioApi) {
+        layer2AudioApi.dx7?.onMidi(message.data);
       }
 
       const msgType = getMessageType(message.data[0]);
@@ -65,11 +70,12 @@ export default function ChordRecogniser({ audioApi }: { audioApi: AudioAPI }) {
         midiIn.onmidimessage = () => { };
       }
     };
-  }, [midiIn, audioApi]);
+  }, [midiIn, audioApi, layer2AudioApi]);
 
   return (
     <div>
       <Synth audioApi={audioApi} />
+      {layer2AudioApi && <Synth audioApi={layer2AudioApi} />}
       <div>
         <MidiDeviceSelector
           type="input"

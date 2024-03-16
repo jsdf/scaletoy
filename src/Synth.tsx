@@ -120,9 +120,9 @@ function initDX7(actx: AudioContext, done: (dx7: DX7 | null, actx: AudioContext)
 
 async function loadSampled(actx: AudioContext) {
   const { sampledDX7 } = await import('./sampledDX7');
-  return { sampled: true, ...(await sampledDX7(actx)) };
+  return { actx, sampled: true, dx7: (await sampledDX7(actx)) };
 }
-async function loadSynthImpl(actx: AudioContext) {
+export async function loadSynthInstance(actx: AudioContext): Promise<AudioAPI> {
   if (USE_SAMPLED_DX7) {
     return await loadSampled(actx);
   } else {
@@ -144,7 +144,7 @@ export async function loadSynth(actx: AudioContext) {
     return loadSynthPromise
   }
 
-  loadSynthPromise = loadSynthImpl(actx);
+  loadSynthPromise = loadSynthInstance(actx);
   return loadSynthPromise;
 }
 
@@ -196,7 +196,10 @@ export function Synth({ audioApi, connectToMidiIn }: { audioApi: AudioAPI, conne
 
   useEffect(() => {
     if (!mountedRef.current) return;
-    changeBankRef.current(banklist[0]);
+    const changeBank = changeBankRef.current
+    if (changeBank) {
+      changeBank(banklist[0]);
+    }
   }, [audioApi]);
 
   useEffect(() => {
@@ -254,4 +257,26 @@ export function Synth({ audioApi, connectToMidiIn }: { audioApi: AudioAPI, conne
       </details>
     </div>
   );
+}
+
+
+export function useSynthLayer(actx: AudioContext) {
+  const [layer, setLayer] = useState<AudioAPI | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    let layerLoaded: AudioAPI | null = null;
+    loadSynthInstance(actx).then((layerAudioAPI) => {
+      if (!cancelled) {
+        layerLoaded = layerAudioAPI;
+        setLayer(layerAudioAPI);
+      }
+    })
+    return () => {
+      cancelled = true;
+      layerLoaded?.dx7?.disconnect();
+    }
+  }, []);
+
+  return layer
 }
